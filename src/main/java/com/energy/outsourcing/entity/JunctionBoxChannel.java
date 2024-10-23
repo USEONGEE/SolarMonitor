@@ -13,10 +13,8 @@ public class JunctionBoxChannel {
     private Long id;
 
     private Integer channelNumber;
-    private Double voltage; // 0.1[V] 단위
-    private Double current; // 0.01[A] 단위
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "junction_box_id")
     private JunctionBox junctionBox;
 }

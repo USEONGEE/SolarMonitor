@@ -16,11 +16,14 @@ public abstract class InverterData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String deviceId;
-    private LocalDateTime timestamp;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inverter_id")
+    private Inverter inverter;
 
-    @Enumerated(EnumType.STRING)
-    private InverterType inverterType ;
+    private LocalDateTime timestamp;
+//    private String deviceId;
+//    @Enumerated(EnumType.STRING)
+//    private InverterType inverterType ;
 
     // 공통 필드
     private Double pvVoltage;

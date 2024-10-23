@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,9 +17,12 @@ public class JunctionBox { // 접속반
     private Long id;
 
     private String deviceId;
-    private LocalDateTime timestamp;
 
     @OneToMany(mappedBy = "junctionBox", cascade = CascadeType.ALL)
-    private List<JunctionBoxChannel> channels;
+    private List<JunctionBoxChannel> channels = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inverter_id")
+    private Inverter inverter;
 
 }
