@@ -5,6 +5,7 @@ import com.energy.outsourcing.entity.InverterAccumulation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface InverterAccumulationRepository extends JpaRepository<InverterAccumulation, Long> {
@@ -22,7 +23,7 @@ public interface InverterAccumulationRepository extends JpaRepository<InverterAc
     List<InverterAccumulation> findByInverterIdAndTypeAndDateBetween(
             Long inverterId,
             AccumulationType type,
-            LocalDate startDate,
-            LocalDate endDate
+            LocalDateTime startDate,
+            LocalDateTime endDate
     );
 }

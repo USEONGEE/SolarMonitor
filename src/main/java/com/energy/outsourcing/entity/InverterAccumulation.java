@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
@@ -21,5 +22,5 @@ public class InverterAccumulation {
     @Enumerated(EnumType.STRING)
     private AccumulationType type; // DAILY or MONTHLY
 
-    private LocalDate date; // 날짜
+    private LocalDateTime date; // 날짜
 }

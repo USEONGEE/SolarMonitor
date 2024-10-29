@@ -17,7 +17,7 @@ public class InverterDataController {
 
     @GetMapping("/realtime/all")
     public List<InvertersDataResponseDto> getAllInvertersRealtimeData() {
-        return inverterDataService.getAllInvertersRealtimeData();
+        return inverterDataService.getAllInvertersLatestData();
     }
 
     // TODO 전체 누적 발전량도 포함해ㅇ함

@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter @Setter
 public class JunctionBoxChannel extends BaseTimeEntity {
@@ -17,4 +20,7 @@ public class JunctionBoxChannel extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "junction_box_id")
     private JunctionBox junctionBox;
+
+    @OneToMany(mappedBy = "junctionBoxChannel", cascade = CascadeType.ALL)
+    private List<JunctionBoxChannelData> channelDataList = new ArrayList<>();
 }

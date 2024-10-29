@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @DiscriminatorValue("SINGLE")
 @Getter @Setter
@@ -26,6 +28,7 @@ public class SinglePhaseInverterData extends InverterData {
         data.setFrequency(dto.getFrequency());
         data.setCumulativeEnergy(dto.getCumulativeEnergy());
         data.setFaultStatus(dto.getFaultStatus());
+        data.setTimestamp(LocalDateTime.now());
         return data;
     }
 }

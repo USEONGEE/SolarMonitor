@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
 public class ThreePhaseInverterData extends InverterData {
 
-    private Double pvVoltage;
-    private Double pvCurrent;
-    private Double pvPower;
 
     private Double gridVoltageRS;
     private Double gridVoltageST;
@@ -21,12 +20,6 @@ public class ThreePhaseInverterData extends InverterData {
     private Double gridCurrentR;
     private Double gridCurrentS;
     private Double gridCurrentT;
-
-    private Double currentOutput;
-    private Double powerFactor;
-    private Double frequency;
-    private Double cumulativeEnergy;
-    private Integer faultStatus;
 
     public static ThreePhaseInverterData fromDTO(ThreePhaseInverterDto dto) {
         ThreePhaseInverterData data = new ThreePhaseInverterData();
@@ -47,7 +40,7 @@ public class ThreePhaseInverterData extends InverterData {
         data.setFrequency(dto.getFrequency());
         data.setCumulativeEnergy(dto.getCumulativeEnergy());
         data.setFaultStatus(dto.getFaultStatus());
-
+        data.setTimestamp(LocalDateTime.now());
         return data;
     }
 }
