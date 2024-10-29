@@ -8,9 +8,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "phase_type")
 @Getter @Setter
-public abstract class InverterData {
+public abstract class InverterData extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,16 +20,15 @@ public abstract class InverterData {
     private Inverter inverter;
 
     private LocalDateTime timestamp;
-//    private String deviceId;
-//    @Enumerated(EnumType.STRING)
-//    private InverterType inverterType ;
 
     // 공통 필드
-    private Double pvVoltage;
-    private Double pvCurrent;
-    private Double pvPower;
-    private Double frequency;
-    private Double cumulativeEnergy;
-    private Integer faultStatus;
+    private Double pvVoltage; // PV 전압 (평균) - [V]
+    private Double pvCurrent; // PV 전류 (합) - [A]
+    private Double pvPower; // PV 출력 - [W]
+    private Double frequency; // 주파수 0.1 - [Hz]
+    private Double cumulativeEnergy; // 누적 발전량 - [Wh]
+    private Integer faultStatus; // 고장 상태
+    private Double currentOutput; // 현재 출력 - [W]
+    private Double powerFactor; // 역률 0.1 [%]
 
 }

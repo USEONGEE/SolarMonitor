@@ -4,24 +4,22 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
 
 @Entity
 @Getter @Setter
-public class JunctionBox extends BaseTimeEntity { // 접속반
-
+public class InverterAccumulation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String deviceId;
-
-    @OneToMany(mappedBy = "junctionBox", cascade = CascadeType.ALL)
-    private List<JunctionBoxChannel> channels = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inverter_id")
     private Inverter inverter;
 
+    private Double cumulativeEnergy; // 누적 발전량
+    @Enumerated(EnumType.STRING)
+    private AccumulationType type; // DAILY or MONTHLY
+
+    private LocalDate date; // 날짜
 }
