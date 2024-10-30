@@ -13,9 +13,13 @@ import java.util.Optional;
 
 public interface InverterDataRepository extends JpaRepository<InverterData, Long>{
 
-    @Query("SELECT id FROM InverterData id JOIN FETCH id.inverter WHERE id.inverter.id = :inverterId")
-    Optional<InverterData> findByInverterId(@Param("inverterId") Long inverterId);
+    // 금일 최신 데이터 조회 메서드 추가
+    Optional<InverterData> findTopByInverterIdAndTimestampBetweenOrderByTimestampDesc(Long inverterId, LocalDateTime start, LocalDateTime end);
 
+    /**
+     * 모든 인버터의 최신 데이터 조회
+     * @return
+     */
     @Query("SELECT new com.energy.outsourcing.dto.InvertersDataResponseDto(" +
             "i.id, " +
             "d.currentOutput, " +       // realtimeKw에 매핑
@@ -30,7 +34,7 @@ public interface InverterDataRepository extends JpaRepository<InverterData, Long
             ")")
     List<InvertersDataResponseDto> findAllLatestInverterData();
 
-
+    Optional<InverterData> findTopByInverterIdOrderByTimestampDesc(Long inverterId);
 
     @Query("SELECT id FROM InverterData id JOIN FETCH id.inverter WHERE id.inverter.id = :inverterId AND id.timestamp < :yesterdayEnd ORDER BY id.timestamp DESC")
     Optional<InverterData> findLastInverterDataByInverterId(@Param("inverterId")Long inverterId, @Param("yesterdayEnd")LocalDateTime yesterdayEnd);

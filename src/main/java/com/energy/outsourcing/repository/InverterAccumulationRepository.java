@@ -26,4 +26,10 @@ public interface InverterAccumulationRepository extends JpaRepository<InverterAc
             LocalDateTime startDate,
             LocalDateTime endDate
     );
+
+    // 추가 메서드
+    List<InverterAccumulation> findByTypeAndDateBetween(AccumulationType type, LocalDateTime startDate, LocalDateTime endDate);
+
+    List<InverterAccumulation> findByType(AccumulationType type);
+
 }

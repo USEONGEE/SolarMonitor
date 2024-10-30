@@ -25,7 +25,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@Profile("test")
+@Profile("test || dev")
 @Slf4j
 public class HistoricalDataGeneratorService implements ApplicationRunner {
 

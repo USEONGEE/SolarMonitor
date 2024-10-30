@@ -4,6 +4,7 @@ import com.energy.outsourcing.dto.InverterAccumulationDto;
 import com.energy.outsourcing.service.InverterAccumulationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ public class InverterAccumulationController {
      * @return 시간별 발전량 리스트
      */
     @GetMapping("/{inverterId}/hourly")
-    public List<InverterAccumulationDto> getHourlyGeneration(
+    public ResponseEntity<List<InverterAccumulationDto>>  getHourlyGeneration(
             @PathVariable Long inverterId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -32,7 +33,7 @@ public class InverterAccumulationController {
             date = LocalDate.now();
         }
 
-        return accumulationService.getHourlyAccumulations(inverterId, date);
+        return ResponseEntity.ok(accumulationService.getHourlyAccumulations(inverterId, date));
     }
 
     /**
@@ -42,7 +43,7 @@ public class InverterAccumulationController {
      * @return 일별 발전량 리스트
      */
     @GetMapping("/{inverterId}/daily")
-    public List<InverterAccumulationDto> getDailyGeneration(
+    public ResponseEntity<List<InverterAccumulationDto>>  getDailyGeneration(
             @PathVariable Long inverterId,
             @RequestParam(required = false)
             @DateTimeFormat(pattern = "yyyy-MM") LocalDate month) {
@@ -53,7 +54,7 @@ public class InverterAccumulationController {
             month = month.withDayOfMonth(1);
         }
 
-        return accumulationService.getDailyAccumulations(inverterId, month);
+        return ResponseEntity.ok(accumulationService.getDailyAccumulations(inverterId, month));
     }
 
     /**
@@ -63,7 +64,7 @@ public class InverterAccumulationController {
      * @return 월별 발전량 리스트
      */
     @GetMapping("/{inverterId}/monthly")
-    public List<InverterAccumulationDto> getMonthlyGeneration(
+    public ResponseEntity<List<InverterAccumulationDto>> getMonthlyGeneration(
             @PathVariable Long inverterId,
             @RequestParam(required = false) Integer year) {
 
@@ -71,6 +72,6 @@ public class InverterAccumulationController {
             year = LocalDate.now().getYear();
         }
 
-        return accumulationService.getMonthlyAccumulations(inverterId, year);
+        return ResponseEntity.ok(accumulationService.getMonthlyAccumulations(inverterId, year));
     }
 }
