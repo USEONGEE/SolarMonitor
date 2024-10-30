@@ -9,9 +9,3 @@ spring:
       ddl-auto: create
     show-sql: true
     defer-datasource-initialization: true
-  mysql:
-    host: mysql
-    port: 3306
-    database: energy_db
-    username: username
-    password: 12345
