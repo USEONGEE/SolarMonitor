@@ -9,3 +9,8 @@ spring:
       ddl-auto: create
     show-sql: true
     defer-datasource-initialization: true
+logging:
+  file:
+    name: /logs/application.log
+  level:
+    root: INFO
