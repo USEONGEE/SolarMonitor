@@ -5,6 +5,7 @@ spring:
     username: username
     password: 12345
   jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: create
     show-sql: true
