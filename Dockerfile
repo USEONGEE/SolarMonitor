@@ -22,11 +22,16 @@ RUN ./gradlew clean build -x test --no-daemon
 # 2. 실행 단계: OpenJDK를 사용하여 빌드된 JAR 파일 실행
 FROM openjdk:17-jdk-slim
 
-# 작업 디렉토리 설정
 WORKDIR /app
+
+# 로그 디렉토리 생성
+RUN mkdir -p /logs
 
 # 빌드 단계에서 생성된 JAR 파일 복사
 COPY --from=build /home/gradle/project/build/libs/*.jar app.jar
+
+# 로그 디렉토리 권한 설정
+RUN chmod 755 /logs
 
 # 포트 개방
 EXPOSE 8080
