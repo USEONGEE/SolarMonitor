@@ -1,4 +1,5 @@
-target/
-*.md
-.git
+build/
+.gradle/
+.git/
 .gitignore
+*.md
