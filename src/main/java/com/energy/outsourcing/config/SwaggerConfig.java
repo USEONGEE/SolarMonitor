@@ -16,9 +16,6 @@ public class SwaggerConfig {
                 .info(new Info().title("Energy Outsourcing API")
                         .description("인버터 데이터 관리 API 문서입니다.")
                         .version("v1.0")
-                        .license(new License().name("Apache 2.0").url("http://springdoc.org")))
-                .externalDocs(new ExternalDocumentation()
-                        .description("프로젝트 GitHub 페이지")
-                        .url("https://github.com/your-repo/energy-outsourcing"));
+                        .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }
 }
