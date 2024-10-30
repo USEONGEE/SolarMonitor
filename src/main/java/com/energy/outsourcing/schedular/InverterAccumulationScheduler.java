@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class InverterAccumulationService {
+public class InverterAccumulationScheduler {
 
     private final InverterDataRepository inverterDataRepository;
     private final InverterAccumulationRepository accumulationRepository;
