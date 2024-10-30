@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/inverter")
+@RequestMapping("/api/inverterAccumulations")
 @RequiredArgsConstructor
 public class InverterAccumulationController {
 

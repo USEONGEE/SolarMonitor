@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -25,7 +26,7 @@ public class JunctionBoxChannelDataService {
     private final JunctionBoxChannelDataRepository junctionBoxChannelDataRepository;
 
     // DTO를 받아 데이터를 저장하는 메서드
-    public void saveChannelData(Long junctionBoxId, JunctionBoxChannelDataDto dto) {
+    public JunctionBoxChannelData saveChannelData(Long junctionBoxId, JunctionBoxChannelDataDto dto, LocalDateTime localDateTime) {
 
         // junctionBoxId에 해당하는 JunctionBox를 찾아서 없으면 예외를 발생시킨다.
         JunctionBox junctionBox = junctionBoxRepository.findById(junctionBoxId)
@@ -43,7 +44,7 @@ public class JunctionBoxChannelDataService {
             return junctionBoxChannelRepository.save(newChannel);
         });
 
-        JunctionBoxChannelData data = JunctionBoxChannelData.fromDTO(dto, channel);
-        junctionBoxChannelDataRepository.save(data);
+        JunctionBoxChannelData data = JunctionBoxChannelData.fromDTO(dto, channel, localDateTime);
+        return junctionBoxChannelDataRepository.save(data);
     }
 }

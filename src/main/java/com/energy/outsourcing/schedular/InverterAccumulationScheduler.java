@@ -51,6 +51,9 @@ public class InverterAccumulationScheduler {
     public void accumulateDailyData() {
         List<Inverter> inverters = inverterRepository.findAll();
         LocalDate today = LocalDate.now();
+        // 어제 시작 시간
+        LocalDateTime yesterdayStart = today.minusDays(1).atStartOfDay();
+        // 어제 끝 시간
         LocalDateTime yesterdayEnd = today.atStartOfDay().minusSeconds(10);
 
         for (Inverter inverter : inverters) {
@@ -67,6 +70,8 @@ public class InverterAccumulationScheduler {
                 accumulationRepository.save(dailyAccumulation);
             }
         }
+
+        
     }
 
     // 매월 1일 자정에 지난 달 누적 발전량을 저장

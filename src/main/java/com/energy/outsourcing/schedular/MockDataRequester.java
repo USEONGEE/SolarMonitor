@@ -57,7 +57,7 @@ public class MockDataRequester implements DataRequester {
             channelDataList.add(new JunctionBoxChannelDataDto(
                     i,                          // 채널 번호
                     random.nextInt(10000),      // 원시 전압 데이터 0 ~ 9999
-                    random.nextInt(4000) - 2000 // 원시 전류 데이터 -2000 ~ 1999
+                    random.nextInt(4000) // 원시 전류 데이터 -2000 ~ 1999
             ));
         }
         return channelDataList;

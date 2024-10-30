@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/inverter")
 public class InverterController {
 
     private final InverterService inverterService;
 
     // 인버터 데이터 조회
-     @GetMapping("/inverter")
+     @GetMapping
      public ResponseEntity<List<InverterDto>> getInverterData() {
          List<Inverter> inverterData = inverterService.getInverterData();
          List<InverterDto> collect = inverterData.stream()

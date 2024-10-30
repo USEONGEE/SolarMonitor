@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class InverterDataService {
     private final InverterRepository inverterRepository;
     private final InverterDataRepository inverterDataRepository;
@@ -28,33 +28,34 @@ public class InverterDataService {
 
     /**
      * 단상 인버터 데이터 저장
-     * @param inverterId
-     * @param dto
+     * @param inverterId 인버터 ID
+     * @param dto 데이터 DTO
      */
-    public void saveSinglePhaseData(Long inverterId, SinglePhaseInverterDto dto) {
+    @Transactional
+    public InverterData saveSinglePhaseData(Long inverterId, SinglePhaseInverterDto dto, LocalDateTime timestamp) {
         Inverter inverter = inverterRepository.findById(inverterId).orElseThrow(() -> new RuntimeException("Inverter not found"));
         SinglePhaseInverterData data = SinglePhaseInverterData.fromDTO(dto);
         data.setInverter(inverter);
-        data.setTimestamp(LocalDateTime.now());
-        inverterDataRepository.save(data);
+        data.setTimestamp(timestamp);
+        return inverterDataRepository.save(data);
     }
 
     /**
      * 삼상 인버터 데이터 저장
-     * @param inverterId
-     * @param dto
+     * @param inverterId 인버터 ID
+     * @param dto 데이터 DTO
      */
-    public void saveThreePhaseData(Long inverterId, ThreePhaseInverterDto dto) {
+    @Transactional
+    public InverterData saveThreePhaseData(Long inverterId, ThreePhaseInverterDto dto, LocalDateTime timestamp) {
         Inverter inverter = inverterRepository.findById(inverterId).orElseThrow(() -> new RuntimeException("Inverter not found"));
         ThreePhaseInverterData data = ThreePhaseInverterData.fromDTO(dto);
         data.setInverter(inverter);
-        data.setTimestamp(LocalDateTime.now());
-        inverterDataRepository.save(data);
+        data.setTimestamp(timestamp);
+        return inverterDataRepository.save(data);
     }
 
     /**
      * 모든 인버터의 최신 데이터 조회
-     * @return
      */
     // TODO 나중에 인버터 갯수가 많아진다면 한 번에 조회하도록 해야함.
     public List<InvertersDataResponseDto> getAllInvertersLatestData() {
@@ -64,9 +65,8 @@ public class InverterDataService {
     /**
      * 인버터 상세 조회
      * @param inverterId
-     * @return
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public InverterDetailResponseDto getInverterDetail(Long inverterId) {
         // 인버터 존재 여부 확인
         Inverter inverter = inverterRepository.findById(inverterId)
@@ -88,6 +88,21 @@ public class InverterDataService {
 
         // DTO 생성 및 반환
         return InverterDetailResponseDto.fromInverterData(latestData, totalMonthlyCumulativeEnergy);
+    }
+
+    /**
+     * 인버터 데이터 조회
+     * @param inverterId 인버터 ID
+     * @param startDate 조회 시작일
+     * @param endDate 조회 종료일
+     */
+    public List<InverterData> getInverterDataBetweenDates(Long inverterId, LocalDateTime startDate, LocalDateTime endDate) {
+        // 날짜 validation
+        if (startDate.isAfter(endDate)) {
+            throw new RuntimeException("시작일이 종료일보다 늦을 수 없습니다.");
+        }
+
+        return inverterDataRepository.findByInverterIdAndTimestampBetween(inverterId, startDate, endDate);
     }
 
 }

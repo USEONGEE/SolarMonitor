@@ -6,6 +6,7 @@ import com.energy.outsourcing.entity.*;
 import com.energy.outsourcing.repository.InverterAccumulationRepository;
 import com.energy.outsourcing.repository.InverterDataRepository;
 import com.energy.outsourcing.repository.InverterRepository;
+import com.energy.outsourcing.repository.JunctionBoxRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+//@Service
 @RequiredArgsConstructor
-@Profile("test || dev")
+@Profile("fdsafdsa")
 @Slf4j
 public class HistoricalDataGeneratorService implements ApplicationRunner {
 
@@ -33,6 +34,7 @@ public class HistoricalDataGeneratorService implements ApplicationRunner {
     private final InverterDataRepository inverterDataRepository;
     private final InverterAccumulationRepository accumulationRepository;
     private final DataRequester dataRequester;
+    private final JunctionBoxRepository junctionBoxRepository;
 
     private Map<Long, Double> inverterCumulativeEnergyMap = new HashMap<>();
 
@@ -52,6 +54,7 @@ public class HistoricalDataGeneratorService implements ApplicationRunner {
         LocalDateTime currentDateTime = startDateTime;
 
         List<Inverter> inverters = inverterRepository.findAll();
+        List<JunctionBox> junctionBoxes = junctionBoxRepository.findAll();
 
         if (inverters.isEmpty()) {
             log.warn("No inverters found. Historical data generation will be skipped.");
@@ -79,7 +82,7 @@ public class HistoricalDataGeneratorService implements ApplicationRunner {
                 // 자정에 누적 에너지 초기화
                 if (currentDateTime.toLocalTime().equals(LocalTime.MIDNIGHT)) {
                     inverterCumulativeEnergyMap.put(inverter.getId(), 0.0);
-                    log.debug("Cumulative energy reset for inverter ID: {}", inverter.getId());
+//                    log.debug("Cumulative energy reset for inverter ID: {}", inverter.getId());
                 }
 
                 // 현재 누적 에너지 가져오기
