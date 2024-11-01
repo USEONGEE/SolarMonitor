@@ -23,7 +23,8 @@ public interface InverterDataRepository extends JpaRepository<InverterData, Long
     @Query("SELECT new com.energy.outsourcing.dto.InvertersDataResponseDto(" +
             "i.id, " +
             "d.currentOutput, " +       // realtimeKw에 매핑
-            "d.cumulativeEnergy " +    // dailyCumulativeKw에 매핑
+            "d.cumulativeEnergy, " +
+            "d.timestamp " + // dailyCumulativeKw에 매핑
             ") " +
             "FROM Inverter i " +
             "JOIN i.inverterDataList d " +

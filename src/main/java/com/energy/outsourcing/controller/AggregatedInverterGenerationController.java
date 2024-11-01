@@ -16,7 +16,7 @@ public class AggregatedInverterGenerationController {
 
 
     @GetMapping("/generation")
-    public ResponseEntity<AggregatedInverterGenerationDto>  getAggregatedGeneration() {
+    public ResponseEntity<AggregatedInverterGenerationDto> getAggregatedGeneration() {
         return ResponseEntity.ok(aggregatedService.getAggregatedGeneration());
     }
 }

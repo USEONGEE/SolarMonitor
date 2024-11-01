@@ -27,7 +27,7 @@ public class JunctionBoxController {
     public ResponseEntity<List<JunctionBoxResponseDto>> getJunctionBox() {
         List<JunctionBox> allWithInverter = junctionBoxService.findAllWithInverter();
         List<JunctionBoxResponseDto> list = allWithInverter.stream()
-                .map(data -> new JunctionBoxResponseDto(data.getId(), data.getDeviceId(), data.getInverter().getId()))
+                .map(data -> new JunctionBoxResponseDto(data.getId(), data.getInverter().getId()))
                 .toList();
         return ResponseEntity.ok(list);
     }

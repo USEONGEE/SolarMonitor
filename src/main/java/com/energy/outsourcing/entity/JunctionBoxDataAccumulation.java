@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(indexes = {
-        @Index(name = "idx_timestamp", columnList = "timestamp")
+        @Index(name = "junction_box_data_timestamp", columnList = "timestamp")
 })
 public class JunctionBoxDataAccumulation {
 
@@ -31,4 +31,10 @@ public class JunctionBoxDataAccumulation {
     private LocalDateTime timestamp;
     private AccumulationType type; // HOURLY only
 
+    public JunctionBoxDataAccumulation(Double power, JunctionBox junctionBox, LocalDateTime timestamp, AccumulationType type) {
+        this.power = power;
+        this.junctionBox = junctionBox;
+        this.timestamp = timestamp;
+        this.type = type;
+    }
 }

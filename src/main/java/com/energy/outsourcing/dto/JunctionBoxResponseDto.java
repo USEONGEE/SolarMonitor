@@ -13,7 +13,5 @@ import java.util.List;
 public class JunctionBoxResponseDto {
     private Long id;
 
-    private String deviceId;
-
     private Long inverterId;
 }

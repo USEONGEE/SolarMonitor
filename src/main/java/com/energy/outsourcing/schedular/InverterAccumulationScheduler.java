@@ -1,11 +1,6 @@
 package com.energy.outsourcing.schedular;
-import com.energy.outsourcing.entity.AccumulationType;
-import com.energy.outsourcing.entity.Inverter;
-import com.energy.outsourcing.entity.InverterAccumulation;
-import com.energy.outsourcing.entity.InverterData;
-import com.energy.outsourcing.repository.InverterAccumulationRepository;
-import com.energy.outsourcing.repository.InverterDataRepository;
-import com.energy.outsourcing.repository.InverterRepository;
+import com.energy.outsourcing.entity.*;
+import com.energy.outsourcing.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -22,6 +17,9 @@ public class InverterAccumulationScheduler {
     private final InverterDataRepository inverterDataRepository;
     private final InverterAccumulationRepository accumulationRepository;
     private final InverterRepository inverterRepository;
+    private final JunctionBoxRepository junctionBoxRepository;
+    private final JunctionBoxDataRepository junctionBoxDataRepository;
+    private final JunctionBoxDataAccumulationRepository junctionBoxDataAccumulationRepository;
 
     // 매 시간마다 전 시간의 마지막 데이터를 저장
     @Scheduled(cron = "0 0 * * * ?") // 매 정각마다 실행
@@ -50,6 +48,7 @@ public class InverterAccumulationScheduler {
     @Transactional
     public void accumulateDailyData() {
         List<Inverter> inverters = inverterRepository.findAll();
+        List<JunctionBox> junctionBoxes = junctionBoxRepository.findAll();
         LocalDate today = LocalDate.now();
         // 어제 시작 시간
         LocalDateTime yesterdayStart = today.minusDays(1).atStartOfDay();
@@ -71,7 +70,19 @@ public class InverterAccumulationScheduler {
             }
         }
 
-        
+        for (JunctionBox junctionBox : junctionBoxes) {
+            List<JunctionBoxData> lastData = junctionBoxDataRepository.findByJunctionBoxIdAndTimestampBetween(junctionBox.getId(), yesterdayStart, yesterdayEnd);
+            if (lastData != null) {
+                Double dailyPower = lastData.stream().mapToDouble(JunctionBoxData::getPower).sum();
+
+                JunctionBoxDataAccumulation dailyAccumulation = new JunctionBoxDataAccumulation(dailyPower, junctionBox, yesterdayEnd, AccumulationType.DAILY);
+
+                junctionBoxDataAccumulationRepository.save(dailyAccumulation);
+            }
+        }
+
+
+
     }
 
     // 매월 1일 자정에 지난 달 누적 발전량을 저장

@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,11 +48,11 @@ public class InverterDataController {
      */
     @GetMapping("/{inverterId}/data")
     public ResponseEntity<List<InvertersDataResponseDto>> getInverterData(@PathVariable Long inverterId,
-                                                                          @RequestParam("startDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDateTime,
+                                                                          @RequestParam(value = "startDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDateTime,
                                                                           @RequestParam("endDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDateTime) {
         List<InverterData> inverterDataBetweenDates = inverterDataService.getInverterDataBetweenDates(inverterId, startDateTime, endDateTime);
         return ResponseEntity.ok(inverterDataBetweenDates.stream()
-                .map(data -> new InvertersDataResponseDto(data.getInverter().getId(), data.getCurrentOutput(), data.getCumulativeEnergy()))
+                .map(data -> new InvertersDataResponseDto(data.getInverter().getId(), data.getCurrentOutput(), data.getCumulativeEnergy(), data.getTimestamp()))
                 .collect(Collectors.toList()));
     }
 }

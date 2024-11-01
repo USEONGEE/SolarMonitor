@@ -27,51 +27,51 @@ public class InverterAccumulationController {
     public ResponseEntity<List<InverterAccumulationDto>>  getHourlyGeneration(
             @PathVariable Long inverterId,
             @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate localDate) {
 
-        if (date == null) {
-            date = LocalDate.now();
+        if (localDate == null) {
+            localDate = LocalDate.now();
         }
 
-        return ResponseEntity.ok(accumulationService.getHourlyAccumulations(inverterId, date));
+        return ResponseEntity.ok(accumulationService.getHourlyAccumulations(inverterId, localDate));
     }
 
     /**
      * 일별 발전량 조회 엔드포인트
      * @param inverterId 인버터 ID
-     * @param month 월 (선택 사항, 기본값은 현재 월)
+     * @param localDate 월 (선택 사항, 기본값은 현재 월)
      * @return 일별 발전량 리스트
      */
     @GetMapping("/{inverterId}/daily")
     public ResponseEntity<List<InverterAccumulationDto>>  getDailyGeneration(
             @PathVariable Long inverterId,
             @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-MM") LocalDate month) {
+            @DateTimeFormat(pattern = "yyyy-MM") LocalDate localDate) {
 
-        if (month == null) {
-            month = LocalDate.now().withDayOfMonth(1);
+        if (localDate == null) {
+            localDate = LocalDate.now().withDayOfMonth(1);
         } else {
-            month = month.withDayOfMonth(1);
+            localDate = localDate.withDayOfMonth(1);
         }
 
-        return ResponseEntity.ok(accumulationService.getDailyAccumulations(inverterId, month));
+        return ResponseEntity.ok(accumulationService.getDailyAccumulations(inverterId, localDate));
     }
 
     /**
      * 월별 발전량 조회 엔드포인트
      * @param inverterId 인버터 ID
-     * @param year 연도 (선택 사항, 기본값은 현재 연도)
+     * @param localDate 연도 (선택 사항, 기본값은 현재 연도)
      * @return 월별 발전량 리스트
      */
     @GetMapping("/{inverterId}/monthly")
     public ResponseEntity<List<InverterAccumulationDto>> getMonthlyGeneration(
             @PathVariable Long inverterId,
-            @RequestParam(required = false) Integer year) {
+            @RequestParam(required = false) Integer localDate) {
 
-        if (year == null) {
-            year = LocalDate.now().getYear();
+        if (localDate == null) {
+            localDate = LocalDate.now().getYear();
         }
 
-        return ResponseEntity.ok(accumulationService.getMonthlyAccumulations(inverterId, year));
+        return ResponseEntity.ok(accumulationService.getMonthlyAccumulations(inverterId, localDate));
     }
 }

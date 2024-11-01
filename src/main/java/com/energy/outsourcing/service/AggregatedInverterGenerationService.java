@@ -9,6 +9,7 @@ import com.energy.outsourcing.repository.InverterAccumulationRepository;
 import com.energy.outsourcing.repository.InverterDataRepository;
 import com.energy.outsourcing.repository.InverterRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AggregatedInverterGenerationService {
 
     private final InverterRepository inverterRepository;
@@ -213,23 +215,27 @@ public class AggregatedInverterGenerationService {
      * @return 전체 현재 출력 합계 [W]
      */
     private Double calculateTotalCurrentOutput() {
+        log.info("Calculating total current output...");
         List<Inverter> inverters = inverterRepository.findAll();
         double totalCurrentOutput = 0.0;
 
+
         for (Inverter inverter : inverters) {
+            log.info("Inverter ID: {}", inverter.getId());
             // 각 인버터의 최신 InverterData 조회
             Optional<InverterData> latestDataOpt = inverterDataRepository.findTopByInverterIdAndTimestampBetweenOrderByTimestampDesc(
                     inverter.getId(),
-                    LocalDateTime.MIN,  // 모든 시간을 포함하기 위해 최소값 사용
-                    LocalDateTime.MAX   // 최대값 사용
+                    LocalDate.now().atStartOfDay(), // 오늘 날짜
+                    LocalDateTime.now()   // 현재 시간
             );
 
             if(latestDataOpt.isPresent()) {
                 InverterData latestData = latestDataOpt.get();
                 totalCurrentOutput += latestData.getCurrentOutput();
+                log.info("Current output: {}", latestData.getCurrentOutput());
             }
         }
-
+        log.info("Total current output: {}", totalCurrentOutput);
         return totalCurrentOutput;
     }
 }

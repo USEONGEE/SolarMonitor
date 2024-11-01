@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(indexes = {
-        @Index(name = "idx_timestamp", columnList = "timestamp")
+        @Index(name = "junction_box_timestamp", columnList = "timestamp")
 })
 public class JunctionBoxData {
 
