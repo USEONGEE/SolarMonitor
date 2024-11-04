@@ -31,4 +31,6 @@ public class AggregatedInverterGenerationDto {
 
     @Schema(description = "전체 전력량 [Wh]", example = "1000.0")
     private Double totalCurrentOutput;
+
+    // TODO 발전 시간 추가해야됨
 }

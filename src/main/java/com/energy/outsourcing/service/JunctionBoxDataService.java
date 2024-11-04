@@ -77,6 +77,8 @@ public class JunctionBoxDataService {
         return createJunctionBoxDataRealtimeResponseDto(junctionBoxId, junctionBoxData);
     }
 
+    // 실시간 접속반 생성
+    // 누적 데이터는 분당 실시간 전력 / 60 / 1000(kw) * t시간 -> t 시점의 누적 발전량
     private JunctionBoxDataRealtimeResponseDto createJunctionBoxDataRealtimeResponseDto(Long junctionBoxId, JunctionBoxData junctionBoxData) {
         Double todayPowerSum = this.sumTodayPower(junctionBoxId);
         return new JunctionBoxDataRealtimeResponseDto(junctionBoxId, junctionBoxData.getPower(), todayPowerSum);

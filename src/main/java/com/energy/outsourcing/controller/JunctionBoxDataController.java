@@ -45,6 +45,8 @@ public class JunctionBoxDataController {
      * @param junctionBoxId
      * @return
      */
+
+    // TODO  접속반 하나에 ch이 있는게 아니라 하나의 인버터에 2개의 array가 있고 그게 접속만 ch이다.
     @GetMapping("/{junctionBoxId}/realtime")
     public ResponseEntity<JunctionBoxDataRealtimeResponseDto> getRealtimeData(@PathVariable Long junctionBoxId) {
         JunctionBoxDataRealtimeResponseDto realtimeData = junctionBoxDataService.findRealtimeData(junctionBoxId);
