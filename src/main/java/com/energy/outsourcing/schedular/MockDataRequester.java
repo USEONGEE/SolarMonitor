@@ -53,7 +53,7 @@ public class MockDataRequester implements DataRequester {
     @Override
     public List<JunctionBoxChannelDataDto> requestJunctionBoxData(Long junctionBoxId) {
         List<JunctionBoxChannelDataDto> channelDataList = new ArrayList<>();
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 2; i++) {
             channelDataList.add(new JunctionBoxChannelDataDto(
                     i,                          // 채널 번호
                     random.nextInt(10000),      // 원시 전압 데이터 0 ~ 9999
