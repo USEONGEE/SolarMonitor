@@ -20,4 +20,7 @@ public abstract class BaseTimeEntity {
 
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
+
+    public enum SystemConditionType {
+    }
 }
