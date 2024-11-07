@@ -1,7 +1,7 @@
 package com.energy.outsourcing.service;
 
-import com.energy.outsourcing.dto.JunctionBoxChannelDataDto;
 import com.energy.outsourcing.dto.JunctionBoxDataRealtimeResponseDto;
+import com.energy.outsourcing.dto.JunctionBoxDataRequestDto;
 import com.energy.outsourcing.entity.JunctionBox;
 import com.energy.outsourcing.entity.JunctionBoxData;
 import com.energy.outsourcing.repository.JunctionBoxDataRepository;
@@ -10,90 +10,73 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class JunctionBoxDataService {
-
-    private final JunctionBoxRepository junctionBoxRepository;
     private final JunctionBoxDataRepository junctionBoxDataRepository;
+    private final JunctionBoxRepository junctionBoxRepository;
 
-    /**
-     * 접속반 데이터 저장
-     */
+
     @Transactional
-    public JunctionBoxData saveChannelDataList(Long junctionBoxId, List<JunctionBoxChannelDataDto> junctionBoxDataList, LocalDateTime timestamp) {
-        JunctionBox junctionBox = junctionBoxRepository.findById(junctionBoxId).orElseThrow(() -> new IllegalArgumentException("접속함이 존재하지 않습니다."));
-
-        Double totalVoltage = 0.0;
-        Double totalCurrent = 0.0;
-        Double power = 0.0;
-
-        for (JunctionBoxChannelDataDto channelData : junctionBoxDataList) {
-            totalVoltage += channelData.getVoltage();
-            totalCurrent += channelData.getCurrent();
-            power += channelData.getVoltage() * channelData.getCurrent();
-        }
-
-        // 접속반 계소 데이터
-        JunctionBoxData junctionBoxData = new JunctionBoxData(totalVoltage, totalCurrent, power, junctionBox, timestamp);
+    public JunctionBoxData saveJunctionBoxData(Long junctionBoxId, JunctionBoxDataRequestDto dto, LocalDateTime timestamp) {
+        JunctionBox junctionBox = junctionBoxRepository.findById(junctionBoxId)
+                .orElseThrow(() -> new RuntimeException("JunctionBox not found"));
+        JunctionBoxData junctionBoxData = JunctionBoxData.fromDTO(junctionBox, dto, timestamp);
         return junctionBoxDataRepository.save(junctionBoxData);
     }
 
-    /**
-     * 접속반 데이터 조회, 주어진 사긴 하에서
-     * @param junctionBoxId 접속반 ID
-     * @param start 시작 시간
-     * @param end 끝 시간
-     * @return
-     */
-    public List<JunctionBoxData> findByJunctionBoxIdAndTimestampBetween(Long junctionBoxId, LocalDateTime start, LocalDateTime end) {
-        return junctionBoxDataRepository.findByJunctionBoxIdAndTimestampBetween(junctionBoxId, start, end);
-    }
-
     public List<JunctionBoxDataRealtimeResponseDto> findRealtimeDataAll() {
-        List<JunctionBoxDataRealtimeResponseDto> dtos = new ArrayList<>();
-        List<JunctionBox> junctionBoxList = junctionBoxRepository.findAll();
-        for (JunctionBox junctionBox : junctionBoxList) {
-            Long junctionBoxId = junctionBox.getId();
-            JunctionBoxData junctionBoxData = junctionBoxDataRepository.findTopByJunctionBoxIdOrderByTimestampDesc(junctionBoxId)
-                    .orElseThrow(() -> new IllegalArgumentException("접속함 데이터가 존재하지 않습니다."));
-            JunctionBoxDataRealtimeResponseDto junctionBoxDataRealtimeResponseDto
-                    = createJunctionBoxDataRealtimeResponseDto(junctionBoxId, junctionBoxData);
-            dtos.add(junctionBoxDataRealtimeResponseDto);
+        List<JunctionBox> all = junctionBoxRepository.findAll();
+        List<JunctionBoxDataRealtimeResponseDto> response = new ArrayList<>();
+
+        LocalDateTime midnight = LocalDate.now().atStartOfDay();
+        LocalDateTime timestamp = LocalDateTime.now();
+        LocalDateTime startTime = timestamp.minus(2, ChronoUnit.MINUTES);
+        LocalDateTime endTime = timestamp;
+
+        // ahems
+        for (JunctionBox junctionBox : all) {
+            // 접속반의 2분 내의 데이터 중 가장 최신 데이터 조회 -> 2분 내의 데이터가 없을 경우 empty 객체 반환
+            JunctionBoxData lastData = junctionBoxDataRepository.findFirstByJunctionBoxIdAndTimestampBetweenOrderByTimestampDesc(junctionBox.getId(), startTime, endTime)
+                    .orElse(JunctionBoxData.empty());
+
+            List<JunctionBoxData> byJunctionBoxIdAndTimestampBetween = junctionBoxDataRepository.findByJunctionBoxIdAndTimestampBetween(junctionBox.getId(), midnight, timestamp);
+
+            double sum = byJunctionBoxIdAndTimestampBetween.stream()
+                    .mapToDouble(JunctionBoxData::getPower)
+                    .sum()/ 60; // 일일 발전량 합계 구하기
+
+            response.add(new JunctionBoxDataRealtimeResponseDto(junctionBox.getId(), lastData.getPower(), sum));
         }
-
-        return dtos;
+        return response;
     }
-
     public JunctionBoxDataRealtimeResponseDto findRealtimeData(Long junctionBoxId) {
-        JunctionBoxData junctionBoxData = junctionBoxDataRepository.findTopByJunctionBoxIdOrderByTimestampDesc(junctionBoxId)
-                .orElseThrow(() -> new IllegalArgumentException("접속함 데이터가 존재하지 않습니다."));
-        return createJunctionBoxDataRealtimeResponseDto(junctionBoxId, junctionBoxData);
+        LocalDateTime midnight = LocalDate.now().atStartOfDay();
+        LocalDateTime timestamp = LocalDateTime.now();
+        LocalDateTime startTime = timestamp.minus(2, ChronoUnit.MINUTES);
+        LocalDateTime endTime = timestamp;
+
+        // 접속반의 2분 내의 데이터 중 가장 최신 데이터 조회 -> 2분 내의 데이터가 없을 경우 empty 객체 반환
+        JunctionBoxData lastData = junctionBoxDataRepository
+                .findFirstByJunctionBoxIdAndTimestampBetweenOrderByTimestampDesc(junctionBoxId, startTime, endTime)
+                .orElse(JunctionBoxData.empty());
+
+        List<JunctionBoxData> dailyData = junctionBoxDataRepository.findByJunctionBoxIdAndTimestampBetween(junctionBoxId, midnight, timestamp);
+        double sum = dailyData.stream().mapToDouble(JunctionBoxData::getPower).sum() / 60; // 일일 발전량 합계 구하기
+
+        return new JunctionBoxDataRealtimeResponseDto(junctionBoxId, lastData.getPower(), sum);
     }
 
-    // 실시간 접속반 생성
-    // 누적 데이터는 분당 실시간 전력 / 60 / 1000(kw) * t시간 -> t 시점의 누적 발전량
-    private JunctionBoxDataRealtimeResponseDto createJunctionBoxDataRealtimeResponseDto(Long junctionBoxId, JunctionBoxData junctionBoxData) {
-        Double todayPowerSum = this.sumTodayPower(junctionBoxId);
-        return new JunctionBoxDataRealtimeResponseDto(junctionBoxId, junctionBoxData.getPower(), todayPowerSum);
+
+    public List<JunctionBoxData> findByJunctionBoxIdAndTimestampBetween(Long junctionBoxId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        return junctionBoxDataRepository.findByJunctionBoxIdAndTimestampBetween(junctionBoxId, startDateTime, endDateTime);
     }
-
-    private Double sumTodayPower(Long junctionBoxId) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = now.withHour(0).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime end = now.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
-        List<JunctionBoxData> junctionBoxDataList = junctionBoxDataRepository.findByJunctionBoxIdAndTimestampBetween(junctionBoxId, start, end);
-
-        return junctionBoxDataList.stream()
-                .mapToDouble(JunctionBoxData::getPower)
-                .sum();
-    }
-
 
 }

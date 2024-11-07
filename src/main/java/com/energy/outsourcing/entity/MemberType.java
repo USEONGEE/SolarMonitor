@@ -1,5 +1,5 @@
 package com.energy.outsourcing.entity;
 
-public enum UserType {
+public enum MemberType {
     ADMIN, USER
 }

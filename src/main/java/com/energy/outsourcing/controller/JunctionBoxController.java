@@ -3,7 +3,6 @@ package com.energy.outsourcing.controller;
 import com.energy.outsourcing.dto.JunctionBoxResponseDto;
 import com.energy.outsourcing.entity.JunctionBox;
 import com.energy.outsourcing.service.JunctionBoxService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +20,6 @@ public class JunctionBoxController {
 
     /**
      * 모든 접속반 조회
-     * @return
      */
     @GetMapping
     public ResponseEntity<List<JunctionBoxResponseDto>> getJunctionBox() {
@@ -33,3 +31,4 @@ public class JunctionBoxController {
     }
 
 }
+

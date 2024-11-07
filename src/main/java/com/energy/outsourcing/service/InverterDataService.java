@@ -48,7 +48,7 @@ public class InverterDataService {
     @Transactional
     public InverterData saveThreePhaseData(Long inverterId, ThreePhaseInverterDto dto, LocalDateTime timestamp) {
         Inverter inverter = inverterRepository.findById(inverterId).orElseThrow(() -> new RuntimeException("Inverter not found"));
-        ThreePhaseInverterData data = ThreePhaseInverterData.fromDTO(dto);
+        ThreePhaseInverterData data = ThreePhaseInverterData.fromDTO(dto, timestamp);
         data.setInverter(inverter);
         data.setTimestamp(timestamp);
         return inverterDataRepository.save(data);

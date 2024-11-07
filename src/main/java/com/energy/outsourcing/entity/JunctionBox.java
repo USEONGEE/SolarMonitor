@@ -4,24 +4,19 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
-@Getter @Setter
-public class JunctionBox extends BaseTimeEntity { // 접속반
+@Getter
+@Setter
+public class JunctionBox {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "increment")
     private Long id;
 
-    private String deviceId;
-
-    @OneToMany(mappedBy = "junctionBox", cascade = CascadeType.ALL)
-    private List<JunctionBoxChannel> channels = new ArrayList<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "inverter_id")
     private Inverter inverter;
+
+    private String deviceId;
 
 }

@@ -39,6 +39,8 @@ public interface InverterDataRepository extends JpaRepository<InverterData, Long
 
     @Query("SELECT id FROM InverterData id JOIN FETCH id.inverter WHERE id.inverter.id = :inverterId AND id.timestamp < :yesterdayEnd ORDER BY id.timestamp DESC")
     Optional<InverterData> findLastInverterDataByInverterId(@Param("inverterId")Long inverterId, @Param("yesterdayEnd")LocalDateTime yesterdayEnd);
+    
+    
 
     List<InverterData> findByInverterIdAndTimestampBetween(Long inverterId, LocalDateTime startDate, LocalDateTime endDate);
 }

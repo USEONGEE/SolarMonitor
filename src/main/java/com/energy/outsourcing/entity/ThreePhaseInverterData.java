@@ -21,7 +21,7 @@ public class ThreePhaseInverterData extends InverterData {
     private Double gridCurrentS;
     private Double gridCurrentT;
 
-    public static ThreePhaseInverterData fromDTO(ThreePhaseInverterDto dto) {
+    public static ThreePhaseInverterData fromDTO(ThreePhaseInverterDto dto, LocalDateTime timestamp) {
         ThreePhaseInverterData data = new ThreePhaseInverterData();
         data.setPvVoltage(dto.getPvVoltage());
         data.setPvCurrent(dto.getPvCurrent());
@@ -40,7 +40,7 @@ public class ThreePhaseInverterData extends InverterData {
         data.setFrequency(dto.getFrequency());
         data.setCumulativeEnergy(dto.getCumulativeEnergy());
         data.setFaultStatus(dto.getFaultStatus());
-        data.setTimestamp(LocalDateTime.now());
+        data.setTimestamp(timestamp);
         return data;
     }
 }

@@ -5,7 +5,6 @@ import com.energy.outsourcing.dto.JunctionBoxDataResponseDto;
 import com.energy.outsourcing.entity.JunctionBoxData;
 import com.energy.outsourcing.service.JunctionBoxDataService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

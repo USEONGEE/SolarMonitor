@@ -1,18 +1,15 @@
 package com.energy.outsourcing.schedular;
 
+import com.energy.outsourcing.dto.JunctionBoxDataRequestDto;
 import com.energy.outsourcing.dto.SinglePhaseInverterDto;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
-import com.energy.outsourcing.dto.JunctionBoxChannelDataDto;
 import com.energy.outsourcing.entity.InverterData;
-import com.energy.outsourcing.entity.JunctionBoxChannelData;
 import com.energy.outsourcing.entity.JunctionBoxData;
-import com.energy.outsourcing.repository.JunctionBoxChannelDataRepository;
 import com.energy.outsourcing.service.InverterDataService;
-import com.energy.outsourcing.service.JunctionBoxChannelDataService;
 import com.energy.outsourcing.service.JunctionBoxDataService;
-import com.energy.outsourcing.service.JunctionBoxService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DataProcessorImpl implements DataProcessor {
     private final InverterDataService inverterDataService;
-    private final JunctionBoxChannelDataService junctionBoxChannelDataService;
     private final JunctionBoxDataService junctionBoxDataService;
 
     @Override
@@ -35,12 +31,8 @@ public class DataProcessorImpl implements DataProcessor {
     }
 
     @Override
-    public JunctionBoxChannelData processJunctionBoxChannelData(Long junctionBoxId, JunctionBoxChannelDataDto data, LocalDateTime timestamp) {
-        return junctionBoxChannelDataService.saveChannelData(junctionBoxId, data,  timestamp);
+    public JunctionBoxData processJunctionBoxData(Long junctionBoxId, JunctionBoxDataRequestDto dto, LocalDateTime timestamp) {
+        return junctionBoxDataService.saveJunctionBoxData(junctionBoxId, dto, timestamp);
     }
 
-    @Override
-    public JunctionBoxData processJunctionBoxData(Long junctionBoxId, List<JunctionBoxChannelDataDto> junctionBoxDataList, LocalDateTime timestamp) {
-        return junctionBoxDataService.saveChannelDataList(junctionBoxId, junctionBoxDataList,  timestamp);
-    }
 }

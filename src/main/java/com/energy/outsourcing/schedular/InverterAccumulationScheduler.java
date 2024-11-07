@@ -2,6 +2,7 @@ package com.energy.outsourcing.schedular;
 import com.energy.outsourcing.entity.*;
 import com.energy.outsourcing.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InverterAccumulationScheduler {
 
     private final InverterDataRepository inverterDataRepository;
@@ -25,12 +27,14 @@ public class InverterAccumulationScheduler {
     @Scheduled(cron = "0 0 * * * ?") // 매 정각마다 실행
     @Transactional
     public void accumulateHourlyData() {
+        log.info("Accumulate hourly data");
+
         List<Inverter> inverters = inverterRepository.findAll();
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES); // 현재 시각의 분 이하 제거
         LocalDateTime lastHourEnd = now.minusHours(1).withMinute(59); // 이전 시간의 끝 시각
 
         for (Inverter inverter : inverters) {
-            InverterData lastData = inverterDataRepository.findLastInverterDataByInverterId(inverter.getId(), lastHourEnd)
+            InverterData lastData = inverterDataRepository.findLastInverterDataByInverterId(inverter.getId(), lastHourEnd) // TODO 여기에 문제
                     .orElse(null);
             if (lastData != null) {
                 InverterAccumulation hourlyAccumulation = new InverterAccumulation();
@@ -47,6 +51,7 @@ public class InverterAccumulationScheduler {
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
     public void accumulateDailyData() {
+        log.info("Accumulate daily data");
         List<Inverter> inverters = inverterRepository.findAll();
         List<JunctionBox> junctionBoxes = junctionBoxRepository.findAll();
         LocalDate today = LocalDate.now();
@@ -89,6 +94,7 @@ public class InverterAccumulationScheduler {
     @Scheduled(cron = "0 0 0 1 * ?")
     @Transactional
     public void accumulateMonthlyData() {
+        log.info("Accumulate monthly data");
         List<Inverter> inverters = inverterRepository.findAll();
         LocalDate lastMonth = LocalDate.now().minusMonths(10);
 

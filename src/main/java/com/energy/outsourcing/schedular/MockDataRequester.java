@@ -1,8 +1,8 @@
 package com.energy.outsourcing.schedular;
 
+import com.energy.outsourcing.dto.JunctionBoxDataRequestDto;
 import com.energy.outsourcing.dto.SinglePhaseInverterDto;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
-import com.energy.outsourcing.dto.JunctionBoxChannelDataDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -51,15 +51,8 @@ public class MockDataRequester implements DataRequester {
     }
 
     @Override
-    public List<JunctionBoxChannelDataDto> requestJunctionBoxData(Long junctionBoxId) {
-        List<JunctionBoxChannelDataDto> channelDataList = new ArrayList<>();
-        for (int i = 1; i <= 2; i++) {
-            channelDataList.add(new JunctionBoxChannelDataDto(
-                    i,                          // 채널 번호
-                    random.nextInt(10000),      // 원시 전압 데이터 0 ~ 9999
-                    random.nextInt(4000) // 원시 전류 데이터 -2000 ~ 1999
-            ));
-        }
-        return channelDataList;
+    public JunctionBoxDataRequestDto requestJunctionBoxData(Long junctionBoxId) {
+        return new JunctionBoxDataRequestDto(295.0 + (random.nextDouble() * 10),
+                random.nextDouble() * 10);
     }
 }

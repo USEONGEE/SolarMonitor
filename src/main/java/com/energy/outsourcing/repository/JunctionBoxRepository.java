@@ -4,16 +4,13 @@ import com.energy.outsourcing.entity.JunctionBox;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-@Repository
-public interface JunctionBoxRepository extends JpaRepository<JunctionBox, Long> {
-
+public interface JunctionBoxRepository extends JpaRepository<JunctionBox, Long>{
     @Query("SELECT j FROM JunctionBox j JOIN FETCH j.inverter WHERE j.inverter.id = :inverterId")
     List<JunctionBox> findByInverterId(@Param("inverterId") Long inverterId);
 
     @Query("SELECT j FROM JunctionBox j JOIN FETCH j.inverter")
     List<JunctionBox> findAllWithInverter();
-
 }

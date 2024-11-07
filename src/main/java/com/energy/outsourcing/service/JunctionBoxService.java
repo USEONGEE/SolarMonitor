@@ -1,8 +1,6 @@
 package com.energy.outsourcing.service;
 
-import com.energy.outsourcing.dto.JunctionBoxChannelDataDto;
 import com.energy.outsourcing.entity.JunctionBox;
-import com.energy.outsourcing.entity.JunctionBoxData;
 import com.energy.outsourcing.repository.JunctionBoxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class JunctionBoxService {
+
     private final JunctionBoxRepository junctionBoxRepository;
 
     public List<JunctionBox> findByInverterId(Long inverterId) {
@@ -23,6 +22,4 @@ public class JunctionBoxService {
     public List<JunctionBox> findAllWithInverter() {
         return junctionBoxRepository.findAllWithInverter();
     }
-
-
 }

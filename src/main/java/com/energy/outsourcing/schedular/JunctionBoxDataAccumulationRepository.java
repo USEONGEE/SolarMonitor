@@ -1,4 +1,4 @@
-package com.energy.outsourcing.repository;
+package com.energy.outsourcing.schedular;
 
 import com.energy.outsourcing.entity.JunctionBoxDataAccumulation;
 import org.springframework.data.jpa.repository.JpaRepository;

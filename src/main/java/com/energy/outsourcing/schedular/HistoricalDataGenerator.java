@@ -1,6 +1,6 @@
 package com.energy.outsourcing.schedular;
 
-import com.energy.outsourcing.dto.JunctionBoxChannelDataDto;
+import com.energy.outsourcing.dto.JunctionBoxDataRequestDto;
 import com.energy.outsourcing.dto.SinglePhaseInverterDto;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
 import com.energy.outsourcing.entity.*;
@@ -101,8 +101,8 @@ public class HistoricalDataGenerator implements ApplicationRunner {
 
             // 접점박스 데이터 저장
             for (JunctionBox junctionBox : junctionBoxes) {
-                List<JunctionBoxChannelDataDto> junctionBoxDataList = dataRequester.requestJunctionBoxData(junctionBox.getId());
-                dataProcessor.processJunctionBoxData(junctionBox.getId(), junctionBoxDataList, currentDateTime);
+                JunctionBoxDataRequestDto junctionBoxDataRequestDto = dataRequester.requestJunctionBoxData(junctionBox.getId());
+                dataProcessor.processJunctionBoxData(junctionBox.getId(), junctionBoxDataRequestDto, currentDateTime);
             }
 
             currentDateTime = currentDateTime.plusMinutes(1);
