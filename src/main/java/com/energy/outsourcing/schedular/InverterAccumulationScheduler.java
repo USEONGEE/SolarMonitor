@@ -34,7 +34,7 @@ public class InverterAccumulationScheduler {
         LocalDateTime lastHourEnd = now.minusHours(1).withMinute(59); // 이전 시간의 끝 시각
 
         for (Inverter inverter : inverters) {
-            InverterData lastData = inverterDataRepository.findLastInverterDataByInverterId(inverter.getId(), lastHourEnd) // TODO 여기에 문제
+            InverterData lastData = inverterDataRepository.findFirstByInverterIdAndTimestampLessThanOrderByTimestampDesc(inverter.getId(), lastHourEnd) // TODO 여기에 문제
                     .orElse(null);
             if (lastData != null) {
                 InverterAccumulation hourlyAccumulation = new InverterAccumulation();
@@ -61,7 +61,7 @@ public class InverterAccumulationScheduler {
         LocalDateTime yesterdayEnd = today.atStartOfDay().minusSeconds(10);
 
         for (Inverter inverter : inverters) {
-            InverterData lastData = inverterDataRepository.findLastInverterDataByInverterId(inverter.getId(), yesterdayEnd)
+            InverterData lastData = inverterDataRepository.findFirstByInverterIdAndTimestampLessThanOrderByTimestampDesc(inverter.getId(), yesterdayEnd)
                     .orElseThrow(() -> new RuntimeException("InverterData not found"));
             if (lastData != null) {
                 InverterAccumulation dailyAccumulation = new InverterAccumulation();
