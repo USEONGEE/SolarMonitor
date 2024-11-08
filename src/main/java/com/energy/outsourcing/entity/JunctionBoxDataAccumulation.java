@@ -22,13 +22,17 @@ public class JunctionBoxDataAccumulation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Double power; // 0.1[W] 단위
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "junction_box_id")
     private JunctionBox junctionBox;
+
     @Column(nullable = false)
     private LocalDateTime timestamp;
+
+    @Column(nullable = false)
     private AccumulationType type; // HOURLY only
 
     public JunctionBoxDataAccumulation(Double power, JunctionBox junctionBox, LocalDateTime timestamp, AccumulationType type) {

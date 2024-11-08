@@ -13,6 +13,7 @@ import lombok.Data;
 public class ThreePhaseInverterDto {
 
     @Schema(description = "태양광 전압 (평균) [V]", example = "320.0")
+
     private Double pvVoltage;
 
     @Schema(description = "태양광 전류 (합) [A]", example = "15.5")

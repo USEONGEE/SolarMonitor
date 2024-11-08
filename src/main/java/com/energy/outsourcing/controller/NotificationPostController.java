@@ -1,5 +1,6 @@
 package com.energy.outsourcing.controller;
 
+import com.energy.outsourcing.dto.NotificationResponseDto;
 import com.energy.outsourcing.entity.NotificationPost;
 import com.energy.outsourcing.service.NotificationPostService;
 import lombok.AllArgsConstructor;
@@ -19,8 +20,14 @@ public class NotificationPostController {
     private final NotificationPostService notificationPostService;
 
     @GetMapping
-    public Page<NotificationPost> getAllPosts(
+    public Page<NotificationResponseDto> getAllPosts(
             @PageableDefault(page = 0, size = 6, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        return notificationPostService.getPosts(pageable);
+        return notificationPostService.getPosts(pageable)
+                .map(post -> new NotificationResponseDto(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getMember().getName(),
+                        post.getCreatedDate()
+                ));
     }
 }

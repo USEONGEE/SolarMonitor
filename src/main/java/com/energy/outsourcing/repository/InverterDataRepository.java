@@ -38,8 +38,10 @@ public interface InverterDataRepository extends JpaRepository<InverterData, Long
 
 
     Optional<InverterData> findFirstByInverterIdAndTimestampLessThanOrderByTimestampDesc(Long inverterId, LocalDateTime yesterdayEnd);
-    
-    
+
 
     List<InverterData> findByInverterIdAndTimestampBetween(Long inverterId, LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("SELECT COUNT(d) FROM InverterData d WHERE d.currentOutput > 0 AND d.inverter.id = :inverterId AND d.timestamp BETWEEN :startDate AND :endDate")
+    Long countByInverterIdAndTimestampBetween(Long inverterId, LocalDateTime startDate, LocalDateTime endDate);
 }

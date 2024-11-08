@@ -24,9 +24,14 @@ public class JunctionBoxData {
     @ManyToOne
     @JoinColumn(name = "junction_box_id")
     private JunctionBox junctionBox;
+
+    @Column(nullable = false)
     private double pvVoltage;
+    @Column(nullable = false)
     private double pvCurrent;
+    @Column(nullable = false)
     private double power;
+    @Column(nullable = false)
     private LocalDateTime timestamp;
 
     // null 객체 반환하는 static method
@@ -45,7 +50,26 @@ public class JunctionBoxData {
         junctionBoxData.setPvCurrent(dto.getPvCurrent());
         junctionBoxData.setPower(junctionBoxData.getPvCurrent() * junctionBoxData.getPvVoltage());
         junctionBoxData.setTimestamp(timestamp);
+        junctionBoxData.validate();
         return junctionBoxData;
     }
 
+
+    private void validate() {
+        if (this.pvVoltage < 0) {
+            throw new IllegalArgumentException("pvVoltage must be greater than or equal to 0");
+        }
+        if (this.pvCurrent < 0) {
+            throw new IllegalArgumentException("pvCurrent must be greater than or equal to 0");
+        }
+        if (this.power < 0) {
+            throw new IllegalArgumentException("power must be greater than or equal to 0");
+        }
+        if (this.timestamp == null) {
+            throw new IllegalArgumentException("timestamp must not be null");
+        }
+        if (this.junctionBox == null) {
+            throw new IllegalArgumentException("junctionBox must not be null");
+        }
+    }
 }

@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Entity
 public class ThreePhaseInverterData extends InverterData {
 
-
     private Double gridVoltageRS;
     private Double gridVoltageST;
     private Double gridVoltageTR;
@@ -41,6 +40,29 @@ public class ThreePhaseInverterData extends InverterData {
         data.setCumulativeEnergy(dto.getCumulativeEnergy());
         data.setFaultStatus(dto.getFaultStatus());
         data.setTimestamp(timestamp);
+        data.validate();
         return data;
+    }
+
+    protected void validate() {
+        super.validate();
+        if (this.gridVoltageRS < 0) {
+            throw new IllegalArgumentException("gridVoltageRS must be greater than or equal to 0");
+        }
+        if (this.gridVoltageST < 0) {
+            throw new IllegalArgumentException("gridVoltageST must be greater than or equal to 0");
+        }
+        if (this.gridVoltageTR < 0) {
+            throw new IllegalArgumentException("gridVoltageTR must be greater than or equal to 0");
+        }
+        if (this.gridCurrentR < 0) {
+            throw new IllegalArgumentException("gridCurrentR must be greater than or equal to 0");
+        }
+        if (this.gridCurrentS < 0) {
+            throw new IllegalArgumentException("gridCurrentS must be greater than or equal to 0");
+        }
+        if (this.gridCurrentT < 0) {
+            throw new IllegalArgumentException("gridCurrentT must be greater than or equal to 0");
+        }
     }
 }

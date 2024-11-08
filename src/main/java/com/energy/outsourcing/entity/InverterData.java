@@ -49,5 +49,32 @@ public abstract class InverterData {
 
     @Column(nullable = false)
     private Double powerFactor; // 역률 0.1 [%]
+
+    protected void validate() {
+        if (this.pvVoltage < 0) {
+            throw new IllegalArgumentException("pvVoltage must be greater than or equal to 0");
+        }
+        if (this.pvCurrent < 0) {
+            throw new IllegalArgumentException("pvCurrent must be greater than or equal to 0");
+        }
+        if (this.pvPower < 0) {
+            throw new IllegalArgumentException("pvPower must be greater than or equal to 0");
+        }
+        if (this.frequency < 0) {
+            throw new IllegalArgumentException("frequency must be greater than or equal to 0");
+        }
+        if (this.cumulativeEnergy < 0) {
+            throw new IllegalArgumentException("cumulativeEnergy must be greater than or equal to 0");
+        }
+        if (this.faultStatus < 0) {
+            throw new IllegalArgumentException("faultStatus must be greater than or equal to 0");
+        }
+        if (this.currentOutput < 0) {
+            throw new IllegalArgumentException("currentOutput must be greater than or equal to 0");
+        }
+        if (this.powerFactor < 0) {
+            throw new IllegalArgumentException("powerFactor must be greater than or equal to 0");
+        }
+    }
 }
 

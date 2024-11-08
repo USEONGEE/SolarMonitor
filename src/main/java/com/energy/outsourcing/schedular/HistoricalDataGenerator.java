@@ -5,6 +5,7 @@ import com.energy.outsourcing.dto.SinglePhaseInverterDto;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
 import com.energy.outsourcing.entity.*;
 import com.energy.outsourcing.repository.InverterAccumulationRepository;
+import com.energy.outsourcing.repository.InverterDataRepository;
 import com.energy.outsourcing.repository.InverterRepository;
 import com.energy.outsourcing.repository.JunctionBoxRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 @Service
@@ -29,6 +31,7 @@ import java.util.Map;
 public class HistoricalDataGenerator implements ApplicationRunner {
 
     private final InverterRepository inverterRepository;
+    private final InverterDataRepository inverterDataRepository;
     private final InverterAccumulationRepository accumulationRepository;
     private final DataRequester dataRequester;
     private final DataProcessor dataProcessor;
@@ -107,6 +110,31 @@ public class HistoricalDataGenerator implements ApplicationRunner {
 
             currentDateTime = currentDateTime.plusMinutes(1);
         }
+
+
+        for (Inverter inverter : inverters) {
+            // 어제 날짜
+            LocalDateTime yesterdayStart = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(0, 0));
+            // 어제의 마지막
+            LocalDateTime yesterdayEnd = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(23, 59));
+
+            long count = inverterDataRepository.findByInverterIdAndTimestampBetween(inverter.getId(), yesterdayStart, yesterdayEnd)
+                    .stream()
+                    .filter(data -> data.getPvPower() > 0)
+                    .count();
+
+            List<InverterAccumulation> byInverterIdAndTypeAndDateBetween = accumulationRepository.findByInverterIdAndTypeAndDateBetween(inverter.getId(),
+                    AccumulationType.DAILY,
+                    yesterdayStart,
+                    yesterdayEnd);
+
+            for (InverterAccumulation inverterAccumulation : byInverterIdAndTypeAndDateBetween) {
+                log.info("inverterAccumulation historical");
+                inverterAccumulation.setGenerationTime(count);
+                accumulationRepository.save(inverterAccumulation);
+            }
+        }
+
         log.info("Historical data generation completed.");
     }
     private InverterAccumulation createHourlyAccumulation(Inverter inverter, LocalDateTime dateTime, double cumulativeEnergy) {

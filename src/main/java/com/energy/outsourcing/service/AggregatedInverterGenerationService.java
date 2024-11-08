@@ -8,6 +8,7 @@ import com.energy.outsourcing.entity.InverterData;
 import com.energy.outsourcing.repository.InverterAccumulationRepository;
 import com.energy.outsourcing.repository.InverterDataRepository;
 import com.energy.outsourcing.repository.InverterRepository;
+import com.energy.outsourcing.schedular.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,10 @@ public class AggregatedInverterGenerationService {
         Double cumulativeGeneration = calculateCumulativeGeneration();
         Double totalCurrentOutput = calculateTotalCurrentOutput();
 
+        LocalDate now = LocalDate.now();
+        LocalDate yesterday = now.minusDays(1);
+
+
         return new AggregatedInverterGenerationDto(
                 todayGeneration,
                 previousDayGeneration,
@@ -51,8 +56,47 @@ public class AggregatedInverterGenerationService {
                 yearlyGeneration,
                 previousYearGeneration,
                 cumulativeGeneration,
-                totalCurrentOutput
+                totalCurrentOutput,
+                calculativeGenerationTime(yesterday),
+                calculativeTodayGenerationTime()
         );
+    }
+
+    private long calculativeTodayGenerationTime() {
+        List<Inverter> inverters = inverterRepository.findAll();
+        TimeUtils.LocalDateTimeRange dayRangeBy = TimeUtils.getDayRangeBy(LocalDate.now());
+        long cumulativeGenerationTime = 0;
+        for (Inverter inverter : inverters) {
+            Long time = inverterDataRepository.countByInverterIdAndTimestampBetween(
+                    inverter.getId(),
+                    dayRangeBy.getStart(),
+                    dayRangeBy.getEnd()
+            );
+            cumulativeGenerationTime += time;
+        }
+        return cumulativeGenerationTime / inverters.size();
+    }
+
+    private long calculativeGenerationTime(LocalDate localDate) {
+        List<Inverter> inverters = inverterRepository.findAll();
+        TimeUtils.LocalDateTimeRange dayRangeBy = TimeUtils.getDayRangeBy(localDate);
+        long cumulativeGenerationTime = 0;
+        for (Inverter inverter : inverters) {
+            List<InverterAccumulation> byInverterIdAndTypeAndDateBetween = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
+                    inverter.getId(),
+                    AccumulationType.DAILY,
+                    dayRangeBy.getStart(),
+                    dayRangeBy.getEnd()
+            );
+
+            if (byInverterIdAndTypeAndDateBetween.size() == 0) {
+                continue;
+            }
+            InverterAccumulation inverterAccumulation = byInverterIdAndTypeAndDateBetween.get(0);
+            cumulativeGenerationTime += inverterAccumulation.getGenerationTime();
+        }
+
+        return cumulativeGenerationTime / inverters.size();
     }
 
     /**

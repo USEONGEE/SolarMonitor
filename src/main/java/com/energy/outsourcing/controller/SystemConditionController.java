@@ -15,7 +15,7 @@ public class SystemConditionController {
     // TODO: Implement this method
     public ResponseEntity<SystemConditionResponseDto> getSystemCondition() {
         return ResponseEntity.ok(SystemConditionResponseDto.of(SystemConditionType.NORMAL,
-                SystemConditionType.MALFUNCTION,
-                SystemConditionType.FIRE));
+                SystemConditionType.NORMAL,
+                SystemConditionType.NORMAL));
     }
 }

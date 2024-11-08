@@ -33,4 +33,6 @@ public class AggregatedInverterGenerationDto {
     private Double totalCurrentOutput;
 
     // TODO 발전 시간 추가해야됨
+    private Long previousDayGenerationTime;
+    private Long todayGenerationTime;
 }
