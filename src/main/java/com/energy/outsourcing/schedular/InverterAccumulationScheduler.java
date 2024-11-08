@@ -43,7 +43,7 @@ public class InverterAccumulationScheduler {
                         inverter,
                         lastData.getCumulativeEnergy(),
                         AccumulationType.HOURLY,
-                        lastHourStart
+                        lastHourEnd
                 );
 
                 accumulationRepository.save(hourlyAccumulation);
