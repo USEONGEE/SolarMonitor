@@ -4,10 +4,8 @@ import com.energy.outsourcing.dto.JunctionBoxDataRequestDto;
 import com.energy.outsourcing.dto.SinglePhaseInverterDto;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
 import com.energy.outsourcing.entity.*;
-import com.energy.outsourcing.repository.InverterAccumulationRepository;
-import com.energy.outsourcing.repository.InverterDataRepository;
-import com.energy.outsourcing.repository.InverterRepository;
-import com.energy.outsourcing.repository.JunctionBoxRepository;
+import com.energy.outsourcing.repository.*;
+import com.energy.outsourcing.service.JunctionBoxDataAccumulationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -19,9 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 @Service
@@ -36,13 +34,15 @@ public class HistoricalDataGenerator implements ApplicationRunner {
     private final DataRequester dataRequester;
     private final DataProcessor dataProcessor;
     private final JunctionBoxRepository junctionBoxRepository;
+    private final JunctionBoxDataRepository junctionBoxDataRepository;
+    private final JunctionBoxDataAccumulationService junctionBoxDataAccumulationService;
     private final Map<Long, Double> inverterCumMonth = new HashMap<>();
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) throws Exception {
         log.info("Generating historical data...");
-        LocalDateTime startDateTime = LocalDateTime.of(2024, 8, 1, 0, 0);
+        LocalDateTime startDateTime = LocalDateTime.of(2024, 9, 1, 0, 0);
         LocalDateTime endDateTime = LocalDate.now().minusDays(1).atTime(23, 59);
         LocalDateTime currentDateTime = startDateTime;
 
@@ -93,7 +93,6 @@ public class HistoricalDataGenerator implements ApplicationRunner {
                     Double v = inverterCumMonth.get(inverter.getId());
                     inverterCumMonth.put(inverter.getId(), v + inverterData.getCumulativeEnergy());
                 }
-
                 // 월별 누적 데이터 저장 (월의 마지막 날)
                 if (currentDateTime.getDayOfMonth() == currentDateTime.toLocalDate().lengthOfMonth()
                         && currentDateTime.toLocalTime().equals(LocalTime.of(23, 59))) {
@@ -106,6 +105,33 @@ public class HistoricalDataGenerator implements ApplicationRunner {
             for (JunctionBox junctionBox : junctionBoxes) {
                 JunctionBoxDataRequestDto junctionBoxDataRequestDto = dataRequester.requestJunctionBoxData(junctionBox.getId());
                 dataProcessor.processJunctionBoxData(junctionBox.getId(), junctionBoxDataRequestDto, currentDateTime);
+
+                // 일별 누적 데이터 저장 (자정 이후 하루가 끝나는 시점)
+                if (currentDateTime.toLocalTime().equals(LocalTime.of(23, 59))) {
+                    TimeUtils.LocalDateTimeRange dayRangeBy = TimeUtils.getDayRangeBy(currentDateTime.toLocalDate());
+                    LocalDateTime start = dayRangeBy.getStart();
+                    LocalDateTime end = dayRangeBy.getEnd();
+                    List<JunctionBoxData> dailyData = junctionBoxDataRepository.findByJunctionBoxIdAndTimestampBetween(junctionBox.getId(), start, end);
+                    double sum = dailyData.stream().mapToDouble(JunctionBoxData::getPower).sum() / 60; // 일일 발전량 합계 구하기
+
+                    JunctionBoxDataAccumulation junctionBoxDataAccumulation = new JunctionBoxDataAccumulation(sum, junctionBox, start, AccumulationType.DAILY);
+                    junctionBoxDataAccumulationService.save(junctionBoxDataAccumulation);
+                }
+
+                if (currentDateTime.getDayOfMonth() == currentDateTime.toLocalDate().lengthOfMonth()
+                        && currentDateTime.toLocalTime().equals(LocalTime.of(23, 59))) {
+                    LocalDate localDate = currentDateTime.toLocalDate();
+
+                    double sum = junctionBoxDataAccumulationService.findDailyLastCumulativeEnergyByMonth(junctionBox.getId(), localDate)
+                            .stream()
+                            .mapToDouble(JunctionBoxDataAccumulation::getCumulativeEnergy)
+                            .sum();
+
+                    JunctionBoxDataAccumulation junctionBoxDataAccumulation
+                            = new JunctionBoxDataAccumulation(sum, junctionBox, currentDateTime, AccumulationType.MONTHLY);
+
+                    junctionBoxDataAccumulationService.save(junctionBoxDataAccumulation);
+                }
             }
 
             currentDateTime = currentDateTime.plusMinutes(1);
@@ -129,7 +155,6 @@ public class HistoricalDataGenerator implements ApplicationRunner {
                     yesterdayEnd);
 
             for (InverterAccumulation inverterAccumulation : byInverterIdAndTypeAndDateBetween) {
-                log.info("inverterAccumulation historical");
                 inverterAccumulation.setGenerationTime(count);
                 accumulationRepository.save(inverterAccumulation);
             }
