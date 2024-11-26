@@ -1,7 +1,10 @@
 package com.energy.outsourcing.controller;
 
 import com.energy.outsourcing.dto.InverterDetailResponseDto;
+import com.energy.outsourcing.dto.InverterDto;
 import com.energy.outsourcing.dto.InvertersDataResponseDto;
+import com.energy.outsourcing.dto.JunctionBoxDetailResponseDto;
+import com.energy.outsourcing.entity.Inverter;
 import com.energy.outsourcing.entity.InverterData;
 import com.energy.outsourcing.service.InverterDataService;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,14 @@ public class InverterDataController {
     @GetMapping("/{inverterId}/detail")
     public ResponseEntity<InverterDetailResponseDto>  getInverterDetail(@PathVariable Long inverterId) {
         return ResponseEntity.ok(inverterDataService.getInverterDetail(inverterId));
+    }
+
+    @GetMapping("/{inverterId}/junction-boxes")
+    public ResponseEntity<List<JunctionBoxDetailResponseDto>> getJunctionBoxesById(
+            @PathVariable Long inverterId
+    ) {
+        List<JunctionBoxDetailResponseDto> responseDtos = inverterDataService.getJunctionBoxesById(inverterId);
+        return ResponseEntity.ok(responseDtos);
     }
 
     /**

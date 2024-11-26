@@ -19,10 +19,4 @@ public class InverterService {
         return inverterRepository.findAll();
     }
 
-    // 인버터 id로 jucntionBox 조회
-    public Inverter getJunctionBoxesById(Long inverterId) {
-        return inverterRepository.findByIdWithJunctionBoxes(inverterId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인버터입니다."));
-    }
-
 }

@@ -1,22 +1,18 @@
 package com.energy.outsourcing.service;
 
-import com.energy.outsourcing.dto.InverterDetailResponseDto;
-import com.energy.outsourcing.dto.InvertersDataResponseDto;
-import com.energy.outsourcing.dto.SinglePhaseInverterDto;
-import com.energy.outsourcing.dto.ThreePhaseInverterDto;
+import com.energy.outsourcing.dto.*;
 import com.energy.outsourcing.entity.*;
 import com.energy.outsourcing.repository.InverterAccumulationRepository;
 import com.energy.outsourcing.repository.InverterDataRepository;
 import com.energy.outsourcing.repository.InverterRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +22,14 @@ public class InverterDataService {
     private final InverterDataRepository inverterDataRepository;
     private final InverterAccumulationRepository accumulationRepository;
 
+    private final JunctionBoxDataService junctionBoxDataService;
+    private final JunctionBoxDataAccumulationService junctionBoxDataAccumulationService;
+
     /**
      * 단상 인버터 데이터 저장
+     *
      * @param inverterId 인버터 ID
-     * @param dto 데이터 DTO
+     * @param dto        데이터 DTO
      */
     @Transactional
     public InverterData saveSinglePhaseData(Long inverterId, SinglePhaseInverterDto dto, LocalDateTime timestamp) {
@@ -42,8 +42,9 @@ public class InverterDataService {
 
     /**
      * 삼상 인버터 데이터 저장
+     *
      * @param inverterId 인버터 ID
-     * @param dto 데이터 DTO
+     * @param dto        데이터 DTO
      */
     @Transactional
     public InverterData saveThreePhaseData(Long inverterId, ThreePhaseInverterDto dto, LocalDateTime timestamp) {
@@ -64,6 +65,7 @@ public class InverterDataService {
 
     /**
      * 인버터 상세 조회
+     *
      * @param inverterId
      */
     @Transactional
@@ -92,17 +94,48 @@ public class InverterDataService {
 
     /**
      * 인버터 데이터 조회
+     *
      * @param inverterId 인버터 ID
-     * @param startDate 조회 시작일
-     * @param endDate 조회 종료일
+     * @param startDate  조회 시작일
+     * @param endDate    조회 종료일
      */
-    public List<InverterData> getInverterDataBetweenDates(Long inverterId, LocalDateTime startDate, LocalDateTime endDate) {
+    public List<InverterData> getInverterDataBetweenDates(Long inverterId,
+                                                          LocalDateTime startDate,
+                                                          LocalDateTime endDate) {
         // 날짜 validation
         if (startDate.isAfter(endDate)) {
             throw new RuntimeException("시작일이 종료일보다 늦을 수 없습니다.");
         }
 
         return inverterDataRepository.findByInverterIdAndTimestampBetween(inverterId, startDate, endDate);
+    }
+
+    // 인버터 id로 junctionBox 조회
+    public List<JunctionBoxDetailResponseDto> getJunctionBoxesById(Long inverterId) {
+        Inverter inverter = inverterRepository.findByIdWithJunctionBoxes(inverterId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 인버터입니다."));
+
+        List<JunctionBoxDetailResponseDto> responseDtos = new ArrayList<>();
+
+        for (JunctionBox junctionBox : inverter.getJunctionBoxes()) {
+            // 실시간 JunctionBoxData 조회
+            JunctionBoxData realtimeJunctionBoxData
+                    = junctionBoxDataService.findRealtimeJunctionBoxData(junctionBox.getId());
+
+            // 금일 누적 발전량 조회
+            Double todayCumulative = junctionBoxDataService.findRealtimeData(junctionBox.getId()).getCumulativeEnergy();
+
+            // 어제까지의 전체 누적 발전량 조회
+            Double previousCumulative = junctionBoxDataAccumulationService.calculateTotalCumulativeEnergyUntilYesterday(junctionBox.getId());
+
+            // DTO 생성 및 추가
+            JunctionBoxDetailResponseDto junctionBoxDetailResponseDto = JunctionBoxDetailResponseDto.fromJunctionBoxData(realtimeJunctionBoxData,
+                    todayCumulative,
+                    previousCumulative + todayCumulative);
+            responseDtos.add(junctionBoxDetailResponseDto);
+        }
+
+        return responseDtos;
     }
 
 }

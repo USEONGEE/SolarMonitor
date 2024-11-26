@@ -30,11 +30,4 @@ public class InverterController {
 
          return ResponseEntity.ok(collect);
      }
-
-//    @GetMapping("/{inverterId}/junction-boxes")
-//    public ResponseEntity<List<InverterDto>> getJunctionBoxesById(
-//            @PathVariable Long inverterId
-//    ) {
-//        Inverter junctionBoxesById = inverterService.getJunctionBoxesById(inverterId);
-//    }
 }
