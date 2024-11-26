@@ -19,4 +19,6 @@ public class JunctionBox {
 
     private String deviceId;
 
+    private Long module_count;
+
 }

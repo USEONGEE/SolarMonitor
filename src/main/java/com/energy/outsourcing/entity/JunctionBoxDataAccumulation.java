@@ -23,7 +23,7 @@ public class JunctionBoxDataAccumulation {
     private Long id;
 
     @Column(nullable = false)
-    private Double power; // 0.1[W] 단위
+    private Double cumulativeEnergy; // 0.1[W] 단위
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "junction_box_id")
@@ -33,10 +33,10 @@ public class JunctionBoxDataAccumulation {
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
-    private AccumulationType type; // HOURLY only
+    private AccumulationType type;
 
-    public JunctionBoxDataAccumulation(Double power, JunctionBox junctionBox, LocalDateTime timestamp, AccumulationType type) {
-        this.power = power;
+    public JunctionBoxDataAccumulation(Double cumulativeEnergy, JunctionBox junctionBox, LocalDateTime timestamp, AccumulationType type) {
+        this.cumulativeEnergy = cumulativeEnergy;
         this.junctionBox = junctionBox;
         this.timestamp = timestamp;
         this.type = type;

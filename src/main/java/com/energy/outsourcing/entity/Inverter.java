@@ -19,4 +19,7 @@ public class Inverter extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "inverter")
     private List<InverterData> inverterDataList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "inverter")
+    private List<JunctionBox> junctionBoxes = new ArrayList<>();
 }

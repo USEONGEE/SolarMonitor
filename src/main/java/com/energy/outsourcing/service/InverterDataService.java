@@ -84,7 +84,7 @@ public class InverterDataService {
                         LocalDateTime.of(LocalDate.now().getYear(), 12, 31, 23, 59, 59, 999999999)
                 ).stream()
                 .mapToDouble(InverterAccumulation::getCumulativeEnergy)
-                .sum();
+                .sum() + latestData.getCumulativeEnergy();
 
         // DTO 생성 및 반환
         return InverterDetailResponseDto.fromInverterData(latestData, totalMonthlyCumulativeEnergy);
