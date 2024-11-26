@@ -33,6 +33,7 @@ public class JunctionBoxDataAccumulation {
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private AccumulationType type;
 
     public JunctionBoxDataAccumulation(Double cumulativeEnergy, JunctionBox junctionBox, LocalDateTime timestamp, AccumulationType type) {

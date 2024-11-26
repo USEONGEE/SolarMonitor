@@ -16,6 +16,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+// TODO 전체 예외처리 필요
 public class InverterAccumulationScheduler {
 
     private final InverterDataRepository inverterDataRepository;
