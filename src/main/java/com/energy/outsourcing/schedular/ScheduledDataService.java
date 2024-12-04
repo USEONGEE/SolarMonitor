@@ -61,9 +61,8 @@ public class ScheduledDataService {
         }
     }
     // 1시간마다 실행
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void fetchWeatherData() {
-        System.out.println("Fetching weather data...");
         weatherService.fetchAndSaveWeatherData();
     }
 

@@ -6,9 +6,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -34,22 +38,43 @@ public class WeatherService {
             JsonNode items = root.path("response").path("body").path("items").path("item");
 
             for (JsonNode item : items) {
-                WeatherData weatherData = new WeatherData(item.get("baseDate").asText(),
+                // WeatherData 생성
+                WeatherData weatherData = new WeatherData(
+                        item.get("baseDate").asText(),
                         item.get("baseTime").asText(),
                         item.get("category").asText(),
                         item.get("fcstDate").asText(),
                         item.get("fcstTime").asText(),
                         item.get("fcstValue").asText(),
                         item.get("nx").asInt(),
-                        item.get("ny").asInt());
+                        item.get("ny").asInt()
+                );
 
-                if (!repository.existsById(weatherData.getBaseDate())) {
+                // uniqueId를 사용해 중복 확인
+                if (!repository.existsById(weatherData.getUniqueId())) {
                     repository.save(weatherData);
-                    log.info(weatherData.toString());
+                    log.info("Saved: {}", weatherData);
+                } else {
+                    log.info("Skipped (Duplicate): {}", weatherData.getUniqueId());
                 }
             }
         } catch (Exception e) {
             System.err.println("Error fetching or saving weather data: " + e.getMessage());
+        }
+    }
+
+    // 가장 최근 fcstValue 반환
+    public String getLatestFcstValue() {
+        Pageable pageable = PageRequest.of(0, 1); // 가장 최근 데이터 1개만
+        List<WeatherData> latestData = repository.findLatestWeatherData(pageable);
+
+        if (!latestData.isEmpty()) {
+            WeatherData weatherData = latestData.get(0);
+            log.info("Latest fcstValue: {}", weatherData.getFcstValue());
+            return weatherData.getFcstValue();
+        } else {
+            log.warn("No data available!");
+            return null;
         }
     }
 }
