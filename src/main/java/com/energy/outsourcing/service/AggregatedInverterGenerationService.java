@@ -89,7 +89,7 @@ public class AggregatedInverterGenerationService {
                     dayRangeBy.getEnd()
             );
 
-            if (byInverterIdAndTypeAndDateBetween.size() == 0) {
+            if (byInverterIdAndTypeAndDateBetween.isEmpty()) {
                 continue;
             }
             InverterAccumulation inverterAccumulation = byInverterIdAndTypeAndDateBetween.get(0);

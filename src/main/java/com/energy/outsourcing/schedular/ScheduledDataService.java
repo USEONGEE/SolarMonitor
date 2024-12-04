@@ -8,6 +8,7 @@ import com.energy.outsourcing.entity.InverterType;
 import com.energy.outsourcing.entity.JunctionBox;
 import com.energy.outsourcing.repository.InverterRepository;
 import com.energy.outsourcing.repository.JunctionBoxRepository;
+import com.energy.outsourcing.service.WeatherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,6 +26,7 @@ public class ScheduledDataService {
     private final JunctionBoxRepository junctionBoxRepository;
     private final DataRequester dataRequester;
     private final DataProcessor dataProcessor;
+    private final WeatherService weatherService;
 
     // 매분마다 데이터를 요청하고 저장하는 스케줄러 메서드
     @Scheduled(fixedRate = 60000) // 10초마다 실행
@@ -58,4 +60,13 @@ public class ScheduledDataService {
             dataProcessor.processJunctionBoxData(junctionBoxId, junctionBoxDataRequestDto, timestamp);
         }
     }
+    // 1시간마다 실행
+    @Scheduled(cron = "0 0 * * * *")
+    public void fetchWeatherData() {
+        System.out.println("Fetching weather data...");
+        weatherService.fetchAndSaveWeatherData();
+    }
+
+
+
 }
