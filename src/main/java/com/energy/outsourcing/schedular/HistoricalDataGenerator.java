@@ -42,7 +42,7 @@ public class HistoricalDataGenerator implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) throws Exception {
         log.info("Generating historical data...");
-        LocalDateTime startDateTime = LocalDateTime.of(2024, 11, 20, 0, 0);
+        LocalDateTime startDateTime = LocalDateTime.of(2024, 12, 10, 0, 0);
         LocalDateTime endDateTime = LocalDate.now().minusDays(1).atTime(23, 59);
         LocalDateTime currentDateTime = startDateTime;
 

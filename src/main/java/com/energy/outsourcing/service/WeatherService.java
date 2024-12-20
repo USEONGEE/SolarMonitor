@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -27,11 +29,20 @@ public class WeatherService {
     @Transactional
     public void fetchAndSaveWeatherData() {
         try {
-            String url = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst" + "?serviceKey=" + "UZ0z6dPfP50mYZ/xzVxDCOVxbqxUFprY8D3NT1g2zbUH2zBcBBfiXzWHoZDS6f3FIc5iVLmu4k/GpB/5I1a4BA==" +
-                    "&pageNo=4&numOfRows=6&dataType=JSON&base_date=20241204&base_time=2130&nx=68&ny=141";
+            log.info("날씨 데이터를 fetch 시작");
+            LocalDateTime now = LocalDateTime.now().minusHours(1); // 한 시간 전 시간으로 설정
+            String baseDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd")); // 현재 날짜 (YYYYMMDD 형식)
+            String baseTime = now.format(DateTimeFormatter.ofPattern("HH")) + "00"; // 현재 시간에서 분을 제외한 시간 (HH00 형식)
+
+            String url = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst" +
+                    "?serviceKey=" + "UZ0z6dPfP50mYZ/xzVxDCOVxbqxUFprY8D3NT1g2zbUH2zBcBBfiXzWHoZDS6f3FIc5iVLmu4k/GpB/5I1a4BA==" +
+                    "&pageNo=4&numOfRows=6&dataType=JSON&base_date=" + baseDate +
+                    "&base_time=" + baseTime +
+                    "&nx=68&ny=141"; // nx,
 
             RestTemplate restTemplate = new RestTemplate();
             String response = restTemplate.getForObject(url, String.class);
+            System.out.println(response);
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response);
@@ -58,6 +69,7 @@ public class WeatherService {
                     log.info("Skipped (Duplicate): {}", weatherData.getUniqueId());
                 }
             }
+            log.info("날씨 데이터를 fetch 종료");
         } catch (Exception e) {
             System.err.println("Error fetching or saving weather data: " + e.getMessage());
         }

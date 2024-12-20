@@ -21,8 +21,16 @@ public class WeatherDataController {
 
         if (latestValue != null) {
             return ResponseEntity.ok(latestValue);
-        } else {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No forecast data available");
         }
+
+        // 없으면 요청
+        weatherService.fetchAndSaveWeatherData();
+        latestValue = weatherService.getLatestFcstValue();
+
+        if (latestValue != null) {
+                    return ResponseEntity.ok(latestValue);
+        }
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No forecast data available");
     }
 }
