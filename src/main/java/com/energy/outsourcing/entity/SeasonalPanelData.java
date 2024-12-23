@@ -3,6 +3,7 @@ package com.energy.outsourcing.entity;
 import com.energy.outsourcing.dto.SeasonalPanelDataDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SeasonalPanelData extends BaseTimeEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Double inclinedIrradiance;  // 경사일사량 -> Inclined irradiance

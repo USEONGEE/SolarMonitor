@@ -22,8 +22,6 @@ RUN ./gradlew clean build -x test --no-daemon
 # 2. 실행 단계: OpenJDK를 사용하여 빌드된 JAR 파일 실행
 FROM openjdk:17-jdk-slim
 
-WORKDIR /app
-
 # 로그 디렉토리 생성
 RUN mkdir -p /logs
 
