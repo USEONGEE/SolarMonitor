@@ -138,4 +138,15 @@ public class InverterDataService {
         return responseDtos;
     }
 
+    public List<InverterStatusDto> getInverterDataByInverterId() {
+        List<Inverter> inverters = inverterRepository.findAll();
+
+        List<InverterStatusDto> inverterStatusDtos = new ArrayList<>();
+        for (Inverter inverter : inverters) {
+            InverterData inverterData = inverterDataRepository.findTopByInverterIdOrderByTimestampDesc(inverter.getId())
+                    .orElseThrow(() -> new RuntimeException("InverterData not found"));
+            inverterStatusDtos.add(new InverterStatusDto(inverter.getId(), inverterData.getFaultStatus()));
+        }
+        return inverterStatusDtos;
+    }
 }

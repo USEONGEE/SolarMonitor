@@ -7,15 +7,24 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class SeasonalPanelDataDto {
-    private Double inclinedIrradiance;
-    private Double ambientTemperature;
-    private Double horizontalIrradiance;
-    private Double panelTemperature;
+    private Double verticalInsolation;
+    private Double externalTemperature;
+    private Double horizontalInsolation;
+    private Double moduleSurfaceTemperature;
+    public EnvironmentResponseDto.Unit unit = new EnvironmentResponseDto.Unit();
 
     public SeasonalPanelDataDto(SeasonalPanelData seasonalPanelData) {
-        this.inclinedIrradiance = seasonalPanelData.getInclinedIrradiance();
-        this.ambientTemperature = seasonalPanelData.getAmbientTemperature();
-        this.horizontalIrradiance = seasonalPanelData.getHorizontalIrradiance();
-        this.panelTemperature = seasonalPanelData.getPanelTemperature();
+        this.verticalInsolation = seasonalPanelData.getInclinedIrradiance();
+        this.externalTemperature = seasonalPanelData.getAmbientTemperature();
+        this.horizontalInsolation = seasonalPanelData.getHorizontalIrradiance();
+        this.moduleSurfaceTemperature = seasonalPanelData.getPanelTemperature();
+    }
+
+    public static class Unit {
+        public String moduleSurfaceTemperature = "°C";
+        public String externalTemperature = "°C";
+        public String horizontalInsolation = "W/m²";
+        public String verticalInsolation = "W/m²";
+
     }
 }

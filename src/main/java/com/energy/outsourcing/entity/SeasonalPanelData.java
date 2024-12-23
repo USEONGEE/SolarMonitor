@@ -21,9 +21,9 @@ public class SeasonalPanelData extends BaseTimeEntity {
     private Double panelTemperature;   // 모듈온도 -> Panel temperature
 
     public SeasonalPanelData(SeasonalPanelDataDto seasonalPanelDataDto) {
-        this.inclinedIrradiance = seasonalPanelDataDto.getInclinedIrradiance();
-        this.ambientTemperature = seasonalPanelDataDto.getAmbientTemperature();
-        this.horizontalIrradiance = seasonalPanelDataDto.getHorizontalIrradiance();
+        this.inclinedIrradiance = seasonalPanelDataDto.getVerticalInsolation();
+        this.ambientTemperature = seasonalPanelDataDto.getExternalTemperature();
+        this.horizontalIrradiance = seasonalPanelDataDto.getHorizontalInsolation();
         this.panelTemperature = seasonalPanelDataDto.getPanelTemperature();
     }
 }
