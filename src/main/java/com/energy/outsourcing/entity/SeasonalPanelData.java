@@ -24,6 +24,6 @@ public class SeasonalPanelData extends BaseTimeEntity {
         this.inclinedIrradiance = seasonalPanelDataDto.getVerticalInsolation();
         this.ambientTemperature = seasonalPanelDataDto.getExternalTemperature();
         this.horizontalIrradiance = seasonalPanelDataDto.getHorizontalInsolation();
-        this.panelTemperature = seasonalPanelDataDto.getPanelTemperature();
+        this.panelTemperature = seasonalPanelDataDto.getExternalTemperature();
     }
 }

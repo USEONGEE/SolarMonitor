@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 public class SeasonalPanelDataDto {
     private Double verticalInsolation;
     private Double externalTemperature;
@@ -18,6 +17,14 @@ public class SeasonalPanelDataDto {
         this.externalTemperature = seasonalPanelData.getAmbientTemperature();
         this.horizontalInsolation = seasonalPanelData.getHorizontalIrradiance();
         this.moduleSurfaceTemperature = seasonalPanelData.getPanelTemperature();
+    }
+
+    public SeasonalPanelDataDto(Double verticalInsolation, Double externalTemperature,
+                                Double horizontalInsolation, Double moduleSurfaceTemperature) {
+        this.verticalInsolation = verticalInsolation;
+        this.externalTemperature = externalTemperature;
+        this.horizontalInsolation = horizontalInsolation;
+        this.moduleSurfaceTemperature = moduleSurfaceTemperature;
     }
 
     public static class Unit {
