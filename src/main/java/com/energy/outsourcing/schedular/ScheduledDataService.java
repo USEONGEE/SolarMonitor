@@ -1,6 +1,7 @@
 package com.energy.outsourcing.schedular;
 
 import com.energy.outsourcing.dto.JunctionBoxDataRequestDto;
+import com.energy.outsourcing.dto.SeasonalPanelDataDto;
 import com.energy.outsourcing.dto.SinglePhaseInverterDto;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
 import com.energy.outsourcing.entity.Inverter;
@@ -59,6 +60,10 @@ public class ScheduledDataService {
             JunctionBoxDataRequestDto junctionBoxDataRequestDto = dataRequester.requestJunctionBoxData(junctionBoxId);
             dataProcessor.processJunctionBoxData(junctionBoxId, junctionBoxDataRequestDto, timestamp);
         }
+
+        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestJunctionBox();
+        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
+
     }
     // 1시간마다 실행
     @Scheduled(cron = "0 0 * * * *")

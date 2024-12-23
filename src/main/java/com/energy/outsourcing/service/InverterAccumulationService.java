@@ -83,4 +83,38 @@ public class InverterAccumulationService {
                 .map(InverterAccumulationDto::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    // 이번 달 누적 발전량 조회
+    public Double getThisMonthAccumulation(Long inverterId) {
+        LocalDateTime startDateTime = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endDateTime = LocalDate.now().atTime(23, 59, 59, 999999999);
+
+        List<InverterAccumulation> monthlyAccumulations = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
+                inverterId,
+                AccumulationType.DAILY,
+                startDateTime,
+                endDateTime
+        );
+
+        return monthlyAccumulations.stream()
+                .mapToDouble(InverterAccumulation::getCumulativeEnergy)
+                .sum();
+    }
+
+    // 저번 달까지의 누적 발전량
+    public Double getAccumulationUntilLastMonth(Long inverterId) {
+        LocalDateTime startDateTime = LocalDate.now().withDayOfMonth(1).minusMonths(1).atStartOfDay();
+        LocalDateTime endDateTime = LocalDate.now().withDayOfMonth(1).minusDays(1).atTime(23, 59, 59, 999999999);
+
+        List<InverterAccumulation> monthlyAccumulations = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
+                inverterId,
+                AccumulationType.DAILY,
+                startDateTime,
+                endDateTime
+        );
+
+        return monthlyAccumulations.stream()
+                .mapToDouble(InverterAccumulation::getCumulativeEnergy)
+                .sum();
+    }
 }

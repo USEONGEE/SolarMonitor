@@ -1,8 +1,11 @@
 package com.energy.outsourcing.schedular;
 
 import com.energy.outsourcing.dto.JunctionBoxDataRequestDto;
+import com.energy.outsourcing.dto.SeasonalPanelDataDto;
 import com.energy.outsourcing.dto.SinglePhaseInverterDto;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
+import com.energy.outsourcing.entity.JunctionBox;
+import com.energy.outsourcing.entity.SeasonalPanelData;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -55,4 +58,16 @@ public class MockDataRequester implements DataRequester {
         return new JunctionBoxDataRequestDto(295.0 + (random.nextDouble() * 10),
                 random.nextDouble() * 10);
     }
+
+    @Override
+    public SeasonalPanelDataDto requestJunctionBox() {
+        return new SeasonalPanelDataDto(
+                random.nextDouble() * 1000, // 경사일사량
+                random.nextDouble() * 50,   // 외기온도
+                random.nextDouble() * 1000, // 수평일사량
+                random.nextDouble() * 50    // 모듈온도
+        );
+    }
+
+
 }

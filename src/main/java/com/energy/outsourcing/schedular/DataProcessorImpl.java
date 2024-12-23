@@ -1,12 +1,15 @@
 package com.energy.outsourcing.schedular;
 
 import com.energy.outsourcing.dto.JunctionBoxDataRequestDto;
+import com.energy.outsourcing.dto.SeasonalPanelDataDto;
 import com.energy.outsourcing.dto.SinglePhaseInverterDto;
 import com.energy.outsourcing.dto.ThreePhaseInverterDto;
 import com.energy.outsourcing.entity.InverterData;
 import com.energy.outsourcing.entity.JunctionBoxData;
+import com.energy.outsourcing.entity.SeasonalPanelData;
 import com.energy.outsourcing.service.InverterDataService;
 import com.energy.outsourcing.service.JunctionBoxDataService;
+import com.energy.outsourcing.service.SeasonalPanelDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +22,7 @@ import java.util.List;
 public class DataProcessorImpl implements DataProcessor {
     private final InverterDataService inverterDataService;
     private final JunctionBoxDataService junctionBoxDataService;
+    private final SeasonalPanelDataService seasonalPanelDataService;
 
     @Override
     public InverterData processSinglePhaseData(SinglePhaseInverterDto data, LocalDateTime timestamp) {
@@ -33,6 +37,11 @@ public class DataProcessorImpl implements DataProcessor {
     @Override
     public JunctionBoxData processJunctionBoxData(Long junctionBoxId, JunctionBoxDataRequestDto dto, LocalDateTime timestamp) {
         return junctionBoxDataService.saveJunctionBoxData(junctionBoxId, dto, timestamp);
+    }
+
+    @Override
+    public SeasonalPanelData processSeasonalPanelData(SeasonalPanelDataDto seasonalPanelDataDto) {
+        return seasonalPanelDataService.save(seasonalPanelDataDto);
     }
 
 }

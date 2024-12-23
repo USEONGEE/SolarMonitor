@@ -38,7 +38,7 @@ public class WeatherService {
                     "?serviceKey=" + "UZ0z6dPfP50mYZ/xzVxDCOVxbqxUFprY8D3NT1g2zbUH2zBcBBfiXzWHoZDS6f3FIc5iVLmu4k/GpB/5I1a4BA==" +
                     "&pageNo=4&numOfRows=6&dataType=JSON&base_date=" + baseDate +
                     "&base_time=" + baseTime +
-                    "&nx=68&ny=141"; // nx,
+                    "&nx=68&ny=141";
 
             RestTemplate restTemplate = new RestTemplate();
             String response = restTemplate.getForObject(url, String.class);
