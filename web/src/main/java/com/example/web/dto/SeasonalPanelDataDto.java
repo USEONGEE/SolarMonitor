@@ -8,7 +8,7 @@ import lombok.Data;
 public class SeasonalPanelDataDto {
     private Double verticalInsolation;
     private Double externalTemperature;
-    private Double horizontalInsolation;
+    private Double horizontalInsolation; // 수평 일사량, 주로 사용됨
     private Double moduleSurfaceTemperature;
     public EnvironmentResponseDto.Unit unit = new EnvironmentResponseDto.Unit();
 

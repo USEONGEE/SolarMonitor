@@ -1,3 +1,5 @@
 spring:
   profiles:
     active: test # 기본값으로 테스트 프로파일 활성화
+server:
+  port: 8081
