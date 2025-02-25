@@ -1,0 +1,75 @@
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<!--<configuration>-->
+<!--    <property name="LOG_DIR" value="./logs" />-->
+<!--    <property name="LOG_RETENTION_DAYS" value="30" />-->
+
+<!--    &lt;!&ndash; Appender for Inverter_Logger &ndash;&gt;-->
+<!--    <appender name="INVERTER_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+<!--        <file>${LOG_DIR}/Inverter.log</file>-->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+<!--            <fileNamePattern>${LOG_DIR}/Inverter.%d{yyyy-MM-dd}.log</fileNamePattern>-->
+<!--            <maxHistory>${LOG_RETENTION_DAYS}</maxHistory>-->
+<!--        </rollingPolicy>-->
+<!--        <encoder>-->
+<!--            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+<!--    &lt;!&ndash; Appender for InverterData_Logger &ndash;&gt;-->
+<!--    <appender name="INVERTER_DATA_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+<!--        <file>${LOG_DIR}/InverterData.log</file>-->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+<!--            <fileNamePattern>${LOG_DIR}/InverterData.%d{yyyy-MM-dd}.log</fileNamePattern>-->
+<!--            <maxHistory>${LOG_RETENTION_DAYS}</maxHistory>-->
+<!--        </rollingPolicy>-->
+<!--        <encoder>-->
+<!--            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+<!--    &lt;!&ndash; Appender for InverterAccumulation_Logger &ndash;&gt;-->
+<!--    <appender name="INVERTER_ACCUMULATION_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+<!--        <file>${LOG_DIR}/InverterAccumulation.log</file>-->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+<!--            <fileNamePattern>${LOG_DIR}/InverterAccumulation.%d{yyyy-MM-dd}.log</fileNamePattern>-->
+<!--            <maxHistory>${LOG_RETENTION_DAYS}</maxHistory>-->
+<!--        </rollingPolicy>-->
+<!--        <encoder>-->
+<!--            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+<!--    &lt;!&ndash; Repeat for other loggers &ndash;&gt;-->
+<!--    <appender name="JUNCTION_BOX_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+<!--        <file>${LOG_DIR}/JunctionBox.log</file>-->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+<!--            <fileNamePattern>${LOG_DIR}/JunctionBox.%d{yyyy-MM-dd}.log</fileNamePattern>-->
+<!--            <maxHistory>${LOG_RETENTION_DAYS}</maxHistory>-->
+<!--        </rollingPolicy>-->
+<!--        <encoder>-->
+<!--            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+<!--    &lt;!&ndash; Loggers &ndash;&gt;-->
+<!--    <logger name="Inverter_Logger" level="INFO" additivity="false">-->
+<!--        <appender-ref ref="INVERTER_APPENDER" />-->
+<!--    </logger>-->
+
+<!--    <logger name="InverterData_Logger" level="INFO" additivity="false">-->
+<!--        <appender-ref ref="INVERTER_DATA_APPENDER" />-->
+<!--    </logger>-->
+
+<!--    <logger name="InverterAccumulation_Logger" level="INFO" additivity="false">-->
+<!--        <appender-ref ref="INVERTER_ACCUMULATION_APPENDER" />-->
+<!--    </logger>-->
+
+<!--    <logger name="JunctionBox_Logger" level="INFO" additivity="false">-->
+<!--        <appender-ref ref="JUNCTION_BOX_APPENDER" />-->
+<!--    </logger>-->
+
+<!--    &lt;!&ndash; Root logger for fallback &ndash;&gt;-->
+<!--    <root level="INFO">-->
+<!--        <appender-ref ref="INVERTER_APPENDER" />-->
+<!--    </root>-->
+<!--</configuration>-->

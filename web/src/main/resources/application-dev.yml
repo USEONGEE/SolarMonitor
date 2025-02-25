@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 12345
+  h2:
+    console:
+      enabled: true # H2 콘솔을 활성화하여 브라우저에서 DB 확인 가능
+  jpa:
+    hibernate:
+      ddl-auto: update
+    #    show-sql: true # SQL 로그를 콘솔에 표시
+    defer-datasource-initialization: true # DataSource 초기화를 지연시킴
