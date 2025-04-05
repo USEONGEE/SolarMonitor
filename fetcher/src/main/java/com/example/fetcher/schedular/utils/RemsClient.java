@@ -15,8 +15,6 @@ public class RemsClient {
     private final CrcCalculater crcCalculater;
 
     // 시리얼 포트 이름 (예: COM3, /dev/ttyUSB0)
-    @Value("${rems.serialPort}")
-    private String serialPortName;
 
     @Value("${rems.baudRate}")
     private int baudRate;
@@ -84,7 +82,14 @@ public class RemsClient {
         request[4] = (byte) ((crc >> 8) & 0xFF);
         log.info("삼상 인버터 요청 패킷: {}", request);
 
-        return sendRequestSerial(request, 38);
+        if (id == 1L) {
+            return sendRequestSerial(request, 38, "COM12");
+        } else if (id == 2L) {
+            return sendRequestSerial(request, 38, "COM13");
+        } else {
+            throw new IllegalArgumentException("유효하지 않은 id: " + id);
+        }
+
     }
 
     /**
@@ -94,7 +99,7 @@ public class RemsClient {
      * @param expectedResponseLength 예상 응답 길이 (바이트 단위)
      * @return 수신된 응답 바이트 배열
      */
-    private byte[] sendRequestSerial(byte[] request, int expectedResponseLength) {
+    private byte[] sendRequestSerial(byte[] request, int expectedResponseLength, String serialPortName) {
         SerialPort port = SerialPort.getCommPort(serialPortName);
         port.setComPortParameters(baudRate, dataBits, stopBits, parity);
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, READ_TIMEOUT_MS, 0);
