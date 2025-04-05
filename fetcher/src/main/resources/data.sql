@@ -1,5 +1,5 @@
 -- Inverter 데이터 삽입
-INSERT INTO inverter (id, inverter_type, device_id) VALUES (1, 'SINGLE', 'SINGLE_PHASE_1');
+INSERT INTO inverter (id, inverter_type, device_id) VALUES (1, 'THREE', 'SINGLE_PHASE_1');
 INSERT INTO inverter (id, inverter_type, device_id) VALUES (2, 'THREE', 'THREE_PHASE_1');
 
 -- JunctionBox 데이터 삽입

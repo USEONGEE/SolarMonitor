@@ -60,7 +60,13 @@ public class RemsClient {
         log.info("단상 인버터 요청 패킷: {}", request);
 
         log.info("단상 인버터 요청 패킷: {}", request);
-        return sendRequestSerial(request, 26);
+        if (id == 1L) {
+            return sendRequestSerial(request, 38, "COM12");
+        } else if (id == 2L) {
+            return sendRequestSerial(request, 38, "COM13");
+        } else {
+            throw new IllegalArgumentException("유효하지 않은 id: " + id);
+        }
     }
 
     /**
