@@ -25,7 +25,7 @@ rems:
   baudRate: 9600
   dataBits: 8
   stopBits: 1
-  parity: NONE
+  parity: 0
 
 modbus:
   serialPort: COM3  # Windows 환경에서는 "COM3" 등으로 설정
