@@ -109,7 +109,7 @@ public class DataRequesterImpl implements DataRequester {
     @Override
     public SeasonalPanelDataDto requestSeasonal() {
         // COM12 포트를 사용 (필요에 따라 포트 이름과 통신 파라미터 조정)
-        SerialPort port = SerialPort.getCommPort("COM12");
+        SerialPort port = SerialPort.getCommPort("COM10");
         port.setBaudRate(9600);
         port.setNumDataBits(8);
         port.setParity(SerialPort.NO_PARITY);
@@ -126,7 +126,7 @@ public class DataRequesterImpl implements DataRequester {
             String command = "$haeulengcom#";
             byte[] commandBytes = command.getBytes(StandardCharsets.US_ASCII);
             port.writeBytes(commandBytes, commandBytes.length);
-            System.out.println("전송한 명령: " + command);
+            log.info("전송한 명령: " + command);
 
             // 응답 지연 시간 5ms 대기
             Thread.sleep(5);
@@ -138,7 +138,7 @@ public class DataRequesterImpl implements DataRequester {
                 throw new RuntimeException("응답을 받지 못했습니다.");
             }
             String response = new String(buffer, 0, bytesRead, StandardCharsets.US_ASCII).trim();
-            System.out.println("수신된 응답: " + response);
+            log.info("수신된 응답: " + response);
 
             // 응답 문자열 파싱
             // 응답 포맷: (예시) "oomo$D2        53       4.0        74       22.8#"
