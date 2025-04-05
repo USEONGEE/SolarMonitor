@@ -15,18 +15,18 @@ if errorlevel 1 (
 echo 빌드 성공.
 
 REM -----------------------------
-REM 2. 포트 8081 사용 중인 프로세스 종료하기
+REM 2. 포트 8080 사용 중인 프로세스 종료하기
 REM -----------------------------
 set "PID="
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8081 ^| findstr LISTENING') do (
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8080 ^| findstr LISTENING') do (
     set "PID=%%a"
 )
 
 if defined PID (
-    echo Port 8081 is in use by PID !PID!. Killing process...
+    echo Port 8080 is in use by PID !PID!. Killing process...
     taskkill /PID !PID! /F
 ) else (
-    echo No process is using port 8081.
+    echo No process is using port 8080.
 )
 
 REM 잠깐 대기 (프로세스 종료 시간 확보)
