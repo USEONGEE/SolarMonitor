@@ -11,6 +11,7 @@ import com.example.web.repository.JunctionBoxRepository;
 import com.example.web.service.WeatherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,9 @@ public class ScheduledDataService {
     private final WeatherService weatherService;
 
     // 매분마다 데이터를 요청하고 저장하는 스케줄러 메서드
+
     @Scheduled(fixedRate = 60000) // 10초마다 실행
+    @ConditionalOnProperty(name = "scheduler.profile", havingValue = "test", matchIfMissing = true)
     public void fetchDataAndProcess() {
         LocalDateTime timestamp = LocalDateTime.now();
         log.info("Data fetching and processing started at {}", timestamp);
@@ -48,7 +51,6 @@ public class ScheduledDataService {
                 default:
                     log.error("Unknown inverter type: {}", inverter.getInverterType());
             }
-
         }
 
         // 모든 접속함을 조회하고 접속함별 데이터 요청
@@ -58,10 +60,40 @@ public class ScheduledDataService {
             dataProcessor.processJunctionBoxData(junctionBoxId, junctionBoxDataRequestDto, timestamp);
         }
 
-        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestJunctionBox();
+        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal();
         dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
-
     }
+
+
+    @Scheduled(fixedRate = 60000) // 10초마다 실행
+    @ConditionalOnProperty(name = "scheduler.profile", havingValue = "prod", matchIfMissing = true)
+    public void fetchDataAndProcessProd() {
+        LocalDateTime timestamp = LocalDateTime.now();
+        log.info("Data fetching and processing started at {}", timestamp);
+
+        // 모든 인버터를 조회하고 단상, 삼상 데이터 요청
+        for (Inverter inverter : inverterRepository.findAll()) {
+
+            switch (inverter.getInverterType()) {
+                case SINGLE:
+                    dataRequester.requestSinglePhaseData(inverter.getId());
+                    break;
+                case THREE:
+                    dataRequester.requestThreePhaseData(inverter.getId());
+                    break;
+
+                default:
+                    log.error("Unknown inverter type: {}", inverter.getInverterType());
+            }
+
+            dataRequester.requestJunctionBoxData(inverter.getId());
+        }
+
+        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal();
+        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
+    }
+
+
     // 1시간마다 실행
     @Scheduled(cron = "0 0 * * * *")
     public void fetchWeatherData() {

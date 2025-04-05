@@ -56,7 +56,7 @@ public class MockDataRequester implements DataRequester {
     }
 
     @Override
-    public SeasonalPanelDataDto requestJunctionBox() {
+    public SeasonalPanelDataDto requestSeasonal() {
         return new SeasonalPanelDataDto(
                 random.nextDouble() * 1000, // 경사일사량
                 random.nextDouble() * 50,   // 외기온도

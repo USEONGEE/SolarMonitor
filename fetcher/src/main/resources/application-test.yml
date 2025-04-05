@@ -19,3 +19,20 @@ logging:
     name: /logs/application.log
   level:
     root: INFO
+
+rems:
+  serialPort: /dev/ttyUSB0
+  baudRate: 9600
+  dataBits: 8
+  stopBits: 1
+  parity: NONE
+
+modbus:
+  serialPort: /dev/ttyUSB0  # Windows 환경에서는 "COM3" 등으로 설정
+  baudRate: 9600
+  dataBits: 8
+  parity: 0        # 0: NO_PARITY, 1: ODD_PARITY, 2: EVEN_PARITY 등
+  stopBits: 1      # 1: ONE_STOP_BIT, 2: TWO_STOP_BITS 등
+
+scheduler:
+  profile: test

@@ -33,12 +33,13 @@ public class DataRequesterImpl implements DataRequester {
         Inverter inverter = inverterRepository.findById(inverterId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 단상 인버터가 존재하지 않습니다."));
 
-        byte[] response = remsClient.requestSinglePhase(inverter.getDeviceId()); // REMS 요청
+        byte[] response = remsClient.requestSinglePhase(inverter.getId()); // REMS 요청
         SinglePhaseInverterDto dto = parseSinglePhaseResponse(response);
 
         // 데이터를 DB에 저장
         SinglePhaseInverterData data = SinglePhaseInverterData.fromDTO(dto);
         data.setInverter(inverter);
+        data.setTimestamp(LocalDateTime.now());
         inverterDataRepository.save(data);
 
         return dto;
@@ -50,12 +51,13 @@ public class DataRequesterImpl implements DataRequester {
         Inverter inverter = inverterRepository.findById(inverterId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 삼상 인버터가 존재하지 않습니다."));
 
-        byte[] response = remsClient.requestThreePhase(inverter.getDeviceId()); // REMS 요청
+        byte[] response = remsClient.requestThreePhase(inverter.getId()); // REMS 요청
         ThreePhaseInverterDto dto = parseThreePhaseResponse(response);
 
         // 데이터를 DB에 저장
         ThreePhaseInverterData data = ThreePhaseInverterData.fromDTO(dto, LocalDateTime.now());
         data.setInverter(inverter);
+        data.setTimestamp(LocalDateTime.now());
         inverterDataRepository.save(data);
 
         return dto;
@@ -96,7 +98,7 @@ public class DataRequesterImpl implements DataRequester {
 
 
     @Override
-    public SeasonalPanelDataDto requestJunctionBox() {
+    public SeasonalPanelDataDto requestSeasonal() {
         return null;
     }
 

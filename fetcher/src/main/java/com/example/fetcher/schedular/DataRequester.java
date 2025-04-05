@@ -8,7 +8,7 @@ import com.example.web.dto.ThreePhaseInverterDto;
 public interface DataRequester {
     SinglePhaseInverterDto requestSinglePhaseData(Long inverterId);
     ThreePhaseInverterDto requestThreePhaseData(Long inverterId);
-    JunctionBoxDataRequestDto requestJunctionBoxData(Long inverterId); // 접속함 ID를 사용
+    JunctionBoxDataRequestDto requestJunctionBoxData(Long inverterId);
 
-    SeasonalPanelDataDto requestJunctionBox();
+    SeasonalPanelDataDto requestSeasonal();
 }
