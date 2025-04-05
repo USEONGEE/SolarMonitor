@@ -53,11 +53,12 @@ public class RemsClient {
         }
         request[2] = 0x01; // 단상 명령
         int crc = crcCalculater.calculateCRC(request, 3);
-        request[3] = (byte) ((crc >> 8) & 0xFF);
-        request[4] = (byte) (crc & 0xFF);
+        request[3] = (byte) (crc & 0xFF);
+        request[4] = (byte) ((crc >> 8) & 0xFF);
 
         log.info("단상 인버터 요청 패킷: {}", request);
 
+        log.info("단상 인버터 요청 패킷: {}", request);
         return sendRequestSerial(request, 26);
     }
 
@@ -76,8 +77,9 @@ public class RemsClient {
         }
         request[2] = 0x07; // 삼상 명령
         int crc = crcCalculater.calculateCRC(request, 3);
-        request[3] = (byte) ((crc >> 8) & 0xFF);
-        request[4] = (byte) (crc & 0xFF);
+        request[3] = (byte) (crc & 0xFF);
+        request[4] = (byte) ((crc >> 8) & 0xFF);
+        log.info("삼상 인버터 요청 패킷: {}", request);
 
         return sendRequestSerial(request, 38);
     }
