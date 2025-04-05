@@ -33,9 +33,9 @@ REM 잠깐 대기 (프로세스 종료 시간 확보)
 timeout /t 2
 
 REM -----------------------------
-REM 3. 애플리케이션 실행하기
+REM 3. 애플리케이션 실행하기 (백그라운드)
 REM -----------------------------
-echo Starting application...
-start "" java -Dfile.encoding=UTF-8 -jar fetcher/build/libs/fetcher-0.0.1-SNAPSHOT.jar
+echo Starting application in background...
+start /B "" java -Dfile.encoding=UTF-8 -jar fetcher/build/libs/fetcher-0.0.1-SNAPSHOT.jar
 
 pause
