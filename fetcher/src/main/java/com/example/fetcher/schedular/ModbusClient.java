@@ -3,10 +3,12 @@ package com.example.fetcher.schedular;
 import com.fazecast.jSerialComm.SerialPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Profile("prod")
 public class ModbusClient {
 
     private final CrcCalculater crcCalculater;
