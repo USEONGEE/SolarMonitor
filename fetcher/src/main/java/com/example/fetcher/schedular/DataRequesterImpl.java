@@ -108,7 +108,7 @@ public class DataRequesterImpl implements DataRequester {
 
     @Override
     public SeasonalPanelDataDto requestSeasonal() {
-        // COM12 포트를 사용 (필요에 따라 포트 이름과 통신 파라미터 조정)
+        // COM10 포트를 사용 (필요에 따라 포트 이름과 통신 파라미터 조정)
         SerialPort port = SerialPort.getCommPort("COM10");
         port.setBaudRate(9600);
         port.setNumDataBits(8);
@@ -118,7 +118,7 @@ public class DataRequesterImpl implements DataRequester {
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
 
         if (!port.openPort()) {
-            throw new RuntimeException("시리얼 포트를 열 수 없습니다: COM12");
+            throw new RuntimeException("시리얼 포트를 열 수 없습니다: COM10");
         }
 
         try {
@@ -131,7 +131,7 @@ public class DataRequesterImpl implements DataRequester {
             // 응답 지연 시간 5ms 대기
             Thread.sleep(5);
 
-            // 예상 응답 길이만큼 데이터 읽기 (예: 50바이트)
+            // 예상 응답 길이만큼 데이터 읽기 (예: 100바이트)
             byte[] buffer = new byte[100];
             int bytesRead = port.readBytes(buffer, buffer.length);
             if (bytesRead <= 0) {
@@ -140,9 +140,12 @@ public class DataRequesterImpl implements DataRequester {
             String response = new String(buffer, 0, bytesRead, StandardCharsets.US_ASCII).trim();
             log.info("수신된 응답: " + response);
 
-            // 응답 문자열 파싱
-            // 응답 포맷: (예시) "oomo$D2        53       4.0        74       22.8#"
-            // "D2" 이후에 4개의 데이터 필드가 공백을 기준으로 구분되어 있다고 가정합니다.
+            // 응답 문자열 전처리: 끝에 '#' 기호가 있다면 제거
+            if (response.endsWith("#")) {
+                response = response.substring(0, response.length() - 1).trim();
+            }
+
+            // 응답 포맷: 예) "$D2        83       4.3       114       5.2"
             int idx = response.indexOf("D2");
             if (idx == -1) {
                 throw new RuntimeException("응답 포맷이 올바르지 않습니다.");
