@@ -132,7 +132,7 @@ public class DataRequesterImpl implements DataRequester {
             Thread.sleep(5);
 
             // 예상 응답 길이만큼 데이터 읽기 (예: 50바이트)
-            byte[] buffer = new byte[50];
+            byte[] buffer = new byte[100];
             int bytesRead = port.readBytes(buffer, buffer.length);
             if (bytesRead <= 0) {
                 throw new RuntimeException("응답을 받지 못했습니다.");
