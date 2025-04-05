@@ -33,6 +33,7 @@ public class ScheduledDataService {
     @ConditionalOnProperty(name = "scheduler.profile", havingValue = "test", matchIfMissing = true)
     public void fetchDataAndProcess() {
         LocalDateTime timestamp = LocalDateTime.now();
+        log.info("fetch test");
         log.info("Data fetching and processing started at {}", timestamp);
 
         // 모든 인버터를 조회하고 단상, 삼상 데이터 요청
@@ -69,6 +70,7 @@ public class ScheduledDataService {
     @ConditionalOnProperty(name = "scheduler.profile", havingValue = "prod", matchIfMissing = true)
     public void fetchDataAndProcessProd() {
         LocalDateTime timestamp = LocalDateTime.now();
+        log.info("fetch prod");
         log.info("Data fetching and processing started at {}", timestamp);
 
         // 모든 인버터를 조회하고 단상, 삼상 데이터 요청
