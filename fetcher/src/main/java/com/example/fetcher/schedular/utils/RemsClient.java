@@ -1,5 +1,6 @@
-package com.example.fetcher.schedular;
+package com.example.fetcher.schedular.utils;
 
+import com.example.fetcher.schedular.utils.CrcCalculater;
 import com.fazecast.jSerialComm.SerialPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

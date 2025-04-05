@@ -4,12 +4,14 @@ import com.example.web.dto.JunctionBoxDataRequestDto;
 import com.example.web.dto.SeasonalPanelDataDto;
 import com.example.web.dto.SinglePhaseInverterDto;
 import com.example.web.dto.ThreePhaseInverterDto;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
 
 @Component
-public class MockDataRequester implements DataRequester {
+@Profile("test")
+public class DataRequesterMock implements DataRequester {
 
     private final Random random = new Random();
 

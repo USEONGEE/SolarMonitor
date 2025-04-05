@@ -1,4 +1,4 @@
-package com.example.fetcher.schedular;
+package com.example.fetcher.schedular.utils;
 
 import org.springframework.stereotype.Service;
 

@@ -1,5 +1,7 @@
 package com.example.fetcher.schedular;
 
+import com.example.fetcher.schedular.utils.ModbusClient;
+import com.example.fetcher.schedular.utils.RemsClient;
 import com.example.web.dto.JunctionBoxDataRequestDto;
 import com.example.web.dto.SeasonalPanelDataDto;
 import com.example.web.dto.SinglePhaseInverterDto;
@@ -9,15 +11,22 @@ import com.example.web.repository.InverterDataRepository;
 import com.example.web.repository.InverterRepository;
 import com.example.web.repository.JunctionBoxDataRepository;
 import com.example.web.repository.JunctionBoxRepository;
+import com.fazecast.jSerialComm.SerialPort;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Service
+@Service
 @RequiredArgsConstructor
+@Slf4j
+@Profile("prod")
 public class DataRequesterImpl implements DataRequester {
 
     private final InverterRepository inverterRepository;
@@ -99,8 +108,70 @@ public class DataRequesterImpl implements DataRequester {
 
     @Override
     public SeasonalPanelDataDto requestSeasonal() {
-        return null;
+        // COM12 포트를 사용 (필요에 따라 포트 이름과 통신 파라미터 조정)
+        SerialPort port = SerialPort.getCommPort("COM12");
+        port.setBaudRate(9600);
+        port.setNumDataBits(8);
+        port.setParity(SerialPort.NO_PARITY);
+        port.setNumStopBits(SerialPort.ONE_STOP_BIT);
+        // 읽기 타임아웃을 1000ms로 설정
+        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
+
+        if (!port.openPort()) {
+            throw new RuntimeException("시리얼 포트를 열 수 없습니다: COM12");
+        }
+
+        try {
+            // 요청 패킷 전송: "$haeulengcom#"
+            String command = "$haeulengcom#";
+            byte[] commandBytes = command.getBytes(StandardCharsets.US_ASCII);
+            port.writeBytes(commandBytes, commandBytes.length);
+            System.out.println("전송한 명령: " + command);
+
+            // 응답 지연 시간 5ms 대기
+            Thread.sleep(5);
+
+            // 예상 응답 길이만큼 데이터 읽기 (예: 50바이트)
+            byte[] buffer = new byte[50];
+            int bytesRead = port.readBytes(buffer, buffer.length);
+            if (bytesRead <= 0) {
+                throw new RuntimeException("응답을 받지 못했습니다.");
+            }
+            String response = new String(buffer, 0, bytesRead, StandardCharsets.US_ASCII).trim();
+            System.out.println("수신된 응답: " + response);
+
+            // 응답 문자열 파싱
+            // 응답 포맷: (예시) "oomo$D2        53       4.0        74       22.8#"
+            // "D2" 이후에 4개의 데이터 필드가 공백을 기준으로 구분되어 있다고 가정합니다.
+            int idx = response.indexOf("D2");
+            if (idx == -1) {
+                throw new RuntimeException("응답 포맷이 올바르지 않습니다.");
+            }
+            String dataPart = response.substring(idx + 2).trim();
+            // 공백을 기준으로 나누기
+            String[] parts = dataPart.split("\\s+");
+            if (parts.length < 4) {
+                throw new RuntimeException("응답 데이터 필드가 부족합니다. 필드 개수: " + parts.length);
+            }
+
+            // 각 필드를 Double로 파싱
+            double verticalInsolation = Double.parseDouble(parts[0]);
+            double externalTemperature = Double.parseDouble(parts[1]);
+            double horizontalInsolation = Double.parseDouble(parts[2]);
+            double moduleSurfaceTemperature = Double.parseDouble(parts[3]);
+
+            // SeasonalPanelDataDto 생성
+            SeasonalPanelDataDto dto = new SeasonalPanelDataDto(
+                    verticalInsolation, externalTemperature, horizontalInsolation, moduleSurfaceTemperature
+            );
+            return dto;
+        } catch (Exception e) {
+            throw new RuntimeException("데이터 요청 및 파싱 중 오류 발생", e);
+        } finally {
+            port.closePort();
+        }
     }
+
 
     private SinglePhaseInverterDto parseSinglePhaseResponse(byte[] response) {
         if (response.length < 26) {
