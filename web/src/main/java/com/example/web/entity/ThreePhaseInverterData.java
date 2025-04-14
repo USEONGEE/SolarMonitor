@@ -40,7 +40,7 @@ public class ThreePhaseInverterData extends InverterData {
         data.setCumulativeEnergy(dto.getCumulativeEnergy());
         data.setFaultStatus(dto.getFaultStatus());
         data.setTimestamp(timestamp);
-        data.validate();
+//        data.validate();
         return data;
     }
 
