@@ -62,6 +62,7 @@ public class DataRequesterImpl implements DataRequester {
 
         byte[] response = remsClient.requestThreePhase(inverter.getId()); // REMS 요청
         ThreePhaseInverterDto dto = parseThreePhaseResponse(response);
+        log.info("requestThreePhaseData");
         log.info(String.valueOf(dto));
 
         // 데이터를 DB에 저장
