@@ -183,6 +183,7 @@ public class DataRequesterImpl implements DataRequester {
             throw new IllegalArgumentException("Invalid response length for single-phase inverter");
         }
 
+
         int index = 4; // 데이터 시작 위치
         int pvVoltage = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
         int pvCurrent = ((response[index + 2] & 0xFF) << 8) | (response[index + 3] & 0xFF);
@@ -210,6 +211,8 @@ public class DataRequesterImpl implements DataRequester {
                             + response.length
             );
         }
+
+        log.info("삼상인버터 반환 길이: {}", response.length);
 
         int index = 0; // 데이터 시작 위치 (SOP, ID, Command, Data Length 제외)
 
