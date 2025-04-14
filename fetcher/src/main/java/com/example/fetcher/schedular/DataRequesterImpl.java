@@ -210,7 +210,7 @@ public class DataRequesterImpl implements DataRequester {
             );
         }
 
-        int index = 4; // 데이터 시작 위치 (SOP, ID, Command, Data Length 제외)
+        int index = 0; // 데이터 시작 위치 (SOP, ID, Command, Data Length 제외)
 
         // 1. PV 전압(2Byte) + PV 전류(2Byte) + PV 출력(4Byte) = 총 8Byte
         int pvVoltage = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
