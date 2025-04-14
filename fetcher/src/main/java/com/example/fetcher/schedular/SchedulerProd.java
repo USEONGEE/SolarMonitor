@@ -53,9 +53,9 @@ public class SchedulerProd {
             dataRequester.requestJunctionBoxData(inverter.getId());
         }
 
-//        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal();
-//        log.info("seasonalPanelDataDto: {}", seasonalPanelDataDto);
-//        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
+        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal();
+        log.info("seasonalPanelDataDto: {}", seasonalPanelDataDto);
+        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
     }
 
 
