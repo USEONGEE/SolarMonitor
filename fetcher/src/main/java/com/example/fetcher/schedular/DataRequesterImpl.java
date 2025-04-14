@@ -62,6 +62,7 @@ public class DataRequesterImpl implements DataRequester {
 
         byte[] response = remsClient.requestThreePhase(inverter.getId()); // REMS 요청
         ThreePhaseInverterDto dto = parseThreePhaseResponse(response);
+        log.info(dto)
 
         // 데이터를 DB에 저장
         ThreePhaseInverterData data = ThreePhaseInverterData.fromDTO(dto, LocalDateTime.now());
@@ -201,51 +202,70 @@ public class DataRequesterImpl implements DataRequester {
     }
 
     private ThreePhaseInverterDto parseThreePhaseResponse(byte[] response) {
-        if (response.length < 38) {
-            throw new IllegalArgumentException("Invalid response length for three-phase inverter");
+        // 최소 36바이트는 존재해야 한다(사진 기준: 고장 상태 2바이트가 없을 수 있음)
+        if (response.length < 36) {
+            throw new IllegalArgumentException(
+                    "Invalid response length for three-phase inverter. Must be at least 36 bytes, but got "
+                            + response.length
+            );
         }
 
         int index = 4; // 데이터 시작 위치 (SOP, ID, Command, Data Length 제외)
 
-        // 1. 기본 전력 데이터
+        // 1. PV 전압(2Byte) + PV 전류(2Byte) + PV 출력(4Byte) = 총 8Byte
         int pvVoltage = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
         int pvCurrent = ((response[index + 2] & 0xFF) << 8) | (response[index + 3] & 0xFF);
-        int pvPower = ((response[index + 4] & 0xFF) << 24) | ((response[index + 5] & 0xFF) << 16) |
-                ((response[index + 6] & 0xFF) << 8) | (response[index + 7] & 0xFF);
+        int pvPower = ((response[index + 4] & 0xFF) << 24) | ((response[index + 5] & 0xFF) << 16)
+                | ((response[index + 6] & 0xFF) << 8) | (response[index + 7] & 0xFF);
 
-        // 2. 삼상 전압 데이터 (RS, ST, TR 선간 전압)
+        // 2. 삼상 전압 (RS, ST, TR) = 2Byte × 3 = 6Byte
         int gridVoltageRS = ((response[index + 8] & 0xFF) << 8) | (response[index + 9] & 0xFF);
         int gridVoltageST = ((response[index + 10] & 0xFF) << 8) | (response[index + 11] & 0xFF);
         int gridVoltageTR = ((response[index + 12] & 0xFF) << 8) | (response[index + 13] & 0xFF);
 
-        // 3. 삼상 전류 데이터 (R, S, T 상 전류)
+        // 3. 삼상 전류 (R, S, T) = 2Byte × 3 = 6Byte
         int gridCurrentR = ((response[index + 14] & 0xFF) << 8) | (response[index + 15] & 0xFF);
         int gridCurrentS = ((response[index + 16] & 0xFF) << 8) | (response[index + 17] & 0xFF);
         int gridCurrentT = ((response[index + 18] & 0xFF) << 8) | (response[index + 19] & 0xFF);
 
-        // 4. 현재 출력 (4Byte)
-        int currentOutput = ((response[index + 20] & 0xFF) << 24) | ((response[index + 21] & 0xFF) << 16) |
-                ((response[index + 22] & 0xFF) << 8) | (response[index + 23] & 0xFF);
+        // 4. 현재 출력(4Byte)
+        int currentOutput = ((response[index + 20] & 0xFF) << 24) | ((response[index + 21] & 0xFF) << 16)
+                | ((response[index + 22] & 0xFF) << 8) | (response[index + 23] & 0xFF);
 
-        // 5. 역률 (0.1% 단위 변환 필요)
+        // 5. 역률(0.1% 단위 변환 필요) (2Byte)
         double powerFactor = (((response[index + 24] & 0xFF) << 8) | (response[index + 25] & 0xFF)) / 10.0;
 
-        // 6. 주파수 (0.1Hz 단위 변환 필요)
+        // 6. 주파수(0.1Hz 단위 변환 필요) (2Byte)
         double frequency = (((response[index + 26] & 0xFF) << 8) | (response[index + 27] & 0xFF)) / 10.0;
 
-        // 7. 누적 발전량 (8Byte)
-        long cumulativeEnergy = ((response[index + 28] & 0xFFL) << 56) | ((response[index + 29] & 0xFFL) << 48) |
-                ((response[index + 30] & 0xFFL) << 40) | ((response[index + 31] & 0xFFL) << 32) |
-                ((response[index + 32] & 0xFFL) << 24) | ((response[index + 33] & 0xFFL) << 16) |
-                ((response[index + 34] & 0xFFL) << 8) | (response[index + 35] & 0xFFL);
+        // 7. 누적 발전량(8Byte)
+        long cumulativeEnergy = ((response[index + 28] & 0xFFL) << 56) | ((response[index + 29] & 0xFFL) << 48)
+                | ((response[index + 30] & 0xFFL) << 40) | ((response[index + 31] & 0xFFL) << 32)
+                | ((response[index + 32] & 0xFFL) << 24) | ((response[index + 33] & 0xFFL) << 16)
+                | ((response[index + 34] & 0xFFL) << 8) | (response[index + 35] & 0xFFL);
 
-        // 8. 고장 상태 (2Byte)
-        int faultStatus = ((response[index + 36] & 0xFF) << 8) | (response[index + 37] & 0xFF);
+        // 8. 고장 상태(2Byte) - 없을 수도 있으므로 기본값을 0으로 설정
+        int faultStatus = 0;
+        // 응답 길이가 38바이트 이상이라면, 마지막 2바이트를 faultStatus로 파싱
+        if (response.length >= 38) {
+            faultStatus = ((response[index + 36] & 0xFF) << 8) | (response[index + 37] & 0xFF);
+        }
 
         return new ThreePhaseInverterDto(
-                (double) pvVoltage, (double) pvCurrent, (double) pvPower, (double) gridVoltageRS,
-                (double) gridVoltageST, (double) gridVoltageTR, (double) gridCurrentR, (double) gridCurrentS,
-                (double) gridCurrentT, (double) currentOutput, powerFactor, frequency, (double) cumulativeEnergy, faultStatus
+                (double) pvVoltage,
+                (double) pvCurrent,
+                (double) pvPower,
+                (double) gridVoltageRS,
+                (double) gridVoltageST,
+                (double) gridVoltageTR,
+                (double) gridCurrentR,
+                (double) gridCurrentS,
+                (double) gridCurrentT,
+                (double) currentOutput,
+                powerFactor,
+                frequency,
+                (double) cumulativeEnergy,
+                faultStatus
         );
     }
 
