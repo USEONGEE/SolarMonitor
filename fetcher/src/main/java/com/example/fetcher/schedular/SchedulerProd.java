@@ -36,26 +36,26 @@ public class SchedulerProd {
         log.info("Data fetching and processing started at {}", timestamp);
 
         // 모든 인버터를 조회하고 단상, 삼상 데이터 요청
-//        for (Inverter inverter : inverterRepository.findAll()) {
-//
-//            switch (inverter.getInverterType()) {
-//                case SINGLE:
-//                    dataRequester.requestSinglePhaseData(inverter.getId());
-//                    break;
-//                case THREE:
-//                    dataRequester.requestThreePhaseData(inverter.getId());
-//                    break;
-//
-//                default:
-//                    log.error("Unknown inverter type: {}", inverter.getInverterType());
-//            }
-//
-//            dataRequester.requestJunctionBoxData(inverter.getId());
-//        }
+        for (Inverter inverter : inverterRepository.findAll()) {
 
-        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal();
-        log.info("seasonalPanelDataDto: {}", seasonalPanelDataDto);
-        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
+            switch (inverter.getInverterType()) {
+                case SINGLE:
+                    dataRequester.requestSinglePhaseData(inverter.getId());
+                    break;
+                case THREE:
+                    dataRequester.requestThreePhaseData(inverter.getId());
+                    break;
+
+                default:
+                    log.error("Unknown inverter type: {}", inverter.getInverterType());
+            }
+
+            dataRequester.requestJunctionBoxData(inverter.getId());
+        }
+
+//        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal();
+//        log.info("seasonalPanelDataDto: {}", seasonalPanelDataDto);
+//        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
     }
 
 
