@@ -1,12 +1,11 @@
-package com.example.web.service;
+package com.energy.outsourcing.service;
 
-import com.example.web.dto.*;
-import com.example.web.entity.*;
-import com.example.web.repository.InverterAccumulationRepository;
-import com.example.web.repository.InverterDataRepository;
-import com.example.web.repository.InverterRepository;
+import com.energy.outsourcing.dto.*;
+import com.energy.outsourcing.entity.*;
+import com.energy.outsourcing.repository.InverterAccumulationRepository;
+import com.energy.outsourcing.repository.InverterDataRepository;
+import com.energy.outsourcing.repository.InverterRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +17,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@Slf4j
 public class InverterDataService {
     private final InverterRepository inverterRepository;
     private final InverterDataRepository inverterDataRepository;
@@ -140,12 +138,11 @@ public class InverterDataService {
         return responseDtos;
     }
 
-    public List<InverterStatusDto> getInverterStatus() {
+    public List<InverterStatusDto> getInverterDataByInverterId() {
         List<Inverter> inverters = inverterRepository.findAll();
 
         List<InverterStatusDto> inverterStatusDtos = new ArrayList<>();
         for (Inverter inverter : inverters) {
-            log.info("inverter_id: {}", inverter.getId());
             InverterData inverterData = inverterDataRepository.findTopByInverterIdOrderByTimestampDesc(inverter.getId())
                     .orElseThrow(() -> new RuntimeException("InverterData not found"));
             inverterStatusDtos.add(new InverterStatusDto(inverter.getId(), inverterData.getFaultStatus()));

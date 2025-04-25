@@ -37,20 +37,24 @@ public class SchedulerProd {
 
         // 모든 인버터를 조회하고 단상, 삼상 데이터 요청
         for (Inverter inverter : inverterRepository.findAll()) {
+            try {
+                switch (inverter.getInverterType()) {
+                    case SINGLE:
+                        dataRequester.requestSinglePhaseData(inverter.getId());
+                        break;
+                    case THREE:
+                        dataRequester.requestThreePhaseData(inverter.getId());
+                        break;
 
-            switch (inverter.getInverterType()) {
-                case SINGLE:
-                    dataRequester.requestSinglePhaseData(inverter.getId());
-                    break;
-                case THREE:
-                    dataRequester.requestThreePhaseData(inverter.getId());
-                    break;
+                    default:
+                        log.error("Unknown inverter type: {}", inverter.getInverterType());
+                }
 
-                default:
-                    log.error("Unknown inverter type: {}", inverter.getInverterType());
+                dataRequester.requestJunctionBoxData(inverter.getId());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            dataRequester.requestJunctionBoxData(inverter.getId());
         }
 
         SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal();

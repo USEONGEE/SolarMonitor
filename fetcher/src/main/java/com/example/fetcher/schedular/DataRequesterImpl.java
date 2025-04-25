@@ -12,6 +12,7 @@ import com.example.web.repository.InverterRepository;
 import com.example.web.repository.JunctionBoxDataRepository;
 import com.example.web.repository.JunctionBoxRepository;
 import com.fazecast.jSerialComm.SerialPort;
+import jakarta.xml.bind.DatatypeConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -179,12 +180,12 @@ public class DataRequesterImpl implements DataRequester {
 
 
     private SinglePhaseInverterDto parseSinglePhaseResponse(byte[] response) {
-        if (response.length < 26) {
+        if (response.length < 31) {
             throw new IllegalArgumentException("Invalid response length for single-phase inverter");
         }
 
 
-        int index = 4; // 데이터 시작 위치
+        int index = 5; // 데이터 시작 위치
         int pvVoltage = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
         int pvCurrent = ((response[index + 2] & 0xFF) << 8) | (response[index + 3] & 0xFF);
         int pvPower = ((response[index + 4] & 0xFF) << 8) | (response[index + 5] & 0xFF);
@@ -205,19 +206,23 @@ public class DataRequesterImpl implements DataRequester {
 
     private ThreePhaseInverterDto parseThreePhaseResponse(byte[] response) {
         // 최소 36바이트는 존재해야 한다(사진 기준: 고장 상태 2바이트가 없을 수 있음)
-        if (response.length < 36) {
+        if (response.length < 43) {
             throw new IllegalArgumentException(
-                    "Invalid response length for three-phase inverter. Must be at least 36 bytes, but got "
+                    "response lenght ="
                             + response.length
             );
         }
 
+        String hex = DatatypeConverter.printHexBinary(response);
+        log.info("response hex: {}", hex);
+
         log.info("삼상인버터 반환 길이: {}", response.length);
 
-        int index = 0; // 데이터 시작 위치 (SOP, ID, Command, Data Length 제외)
+        int index = 5; // 데이터 시작 위치 (SOP, ID, Command, Data Length 제외)
 
         // 1. PV 전압(2Byte) + PV 전류(2Byte) + PV 출력(4Byte) = 총 8Byte
         int pvVoltage = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
+
         int pvCurrent = ((response[index + 2] & 0xFF) << 8) | (response[index + 3] & 0xFF);
         int pvPower = ((response[index + 4] & 0xFF) << 24) | ((response[index + 5] & 0xFF) << 16)
                 | ((response[index + 6] & 0xFF) << 8) | (response[index + 7] & 0xFF);
