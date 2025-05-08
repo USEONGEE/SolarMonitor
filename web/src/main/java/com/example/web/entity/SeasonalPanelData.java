@@ -14,7 +14,7 @@ public class SeasonalPanelData extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    private Long inverterId; // TODO
+    private Long inverterId; // TODO
 
     private Double inclinedIrradiance;  // 경사일사량 -> Inclined irradiance
     private Double ambientTemperature; // 외기온도 -> Ambient temperature
@@ -26,5 +26,6 @@ public class SeasonalPanelData extends BaseTimeEntity {
         this.ambientTemperature = seasonalPanelDataDto.getExternalTemperature();
         this.horizontalIrradiance = seasonalPanelDataDto.getHorizontalInsolation();
         this.panelTemperature = seasonalPanelDataDto.getExternalTemperature();
+        this.inverterId = seasonalPanelDataDto.getInverterId();
     }
 }

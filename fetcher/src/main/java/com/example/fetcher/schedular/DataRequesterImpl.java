@@ -110,17 +110,17 @@ public class DataRequesterImpl implements DataRequester {
 
 
     @Override
-    public SeasonalPanelDataDto requestSeasonal() {
+    public SeasonalPanelDataDto requestSeasonal(String port, Long inverterId) {
         // COM10 포트를 사용 (필요에 따라 포트 이름과 통신 파라미터 조정)
-        SerialPort port = SerialPort.getCommPort("COM10");
-        port.setBaudRate(9600);
-        port.setNumDataBits(8);
-        port.setParity(SerialPort.NO_PARITY);
-        port.setNumStopBits(SerialPort.ONE_STOP_BIT);
+        SerialPort port1 = SerialPort.getCommPort("COM10");
+        port1.setBaudRate(9600);
+        port1.setNumDataBits(8);
+        port1.setParity(SerialPort.NO_PARITY);
+        port1.setNumStopBits(SerialPort.ONE_STOP_BIT);
         // 읽기 타임아웃을 1000ms로 설정
-        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
+        port1.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
 
-        if (!port.openPort()) {
+        if (!port1.openPort()) {
             throw new RuntimeException("시리얼 포트를 열 수 없습니다: COM10");
         }
 
@@ -128,7 +128,7 @@ public class DataRequesterImpl implements DataRequester {
             // 요청 패킷 전송: "$haeulengcom#"
             String command = "$haeulengcom#";
             byte[] commandBytes = command.getBytes(StandardCharsets.US_ASCII);
-            port.writeBytes(commandBytes, commandBytes.length);
+            port1.writeBytes(commandBytes, commandBytes.length);
             log.info("전송한 명령: " + command);
 
             // 응답 지연 시간 5ms 대기
@@ -136,7 +136,7 @@ public class DataRequesterImpl implements DataRequester {
 
             // 예상 응답 길이만큼 데이터 읽기 (예: 100바이트)
             byte[] buffer = new byte[100];
-            int bytesRead = port.readBytes(buffer, buffer.length);
+            int bytesRead = port1.readBytes(buffer, buffer.length);
             if (bytesRead <= 0) {
                 throw new RuntimeException("응답을 받지 못했습니다.");
             }
@@ -168,13 +168,13 @@ public class DataRequesterImpl implements DataRequester {
 
             // SeasonalPanelDataDto 생성
             SeasonalPanelDataDto dto = new SeasonalPanelDataDto(
-                    verticalInsolation, externalTemperature, horizontalInsolation, moduleSurfaceTemperature
+                    verticalInsolation, externalTemperature, horizontalInsolation, moduleSurfaceTemperature, inverterId
             );
             return dto;
         } catch (Exception e) {
             throw new RuntimeException("데이터 요청 및 파싱 중 오류 발생", e);
         } finally {
-            port.closePort();
+            port1.closePort();
         }
     }
 

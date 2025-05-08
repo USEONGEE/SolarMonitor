@@ -58,12 +58,13 @@ public class DataRequesterMock implements DataRequester {
     }
 
     @Override
-    public SeasonalPanelDataDto requestSeasonal() {
+    public SeasonalPanelDataDto requestSeasonal(String port, Long inverterId) {
         return new SeasonalPanelDataDto(
                 random.nextDouble() * 1000, // 경사일사량
                 random.nextDouble() * 50,   // 외기온도
                 random.nextDouble() * 1000, // 수평일사량
-                random.nextDouble() * 50    // 모듈온도
+                random.nextDouble() * 50,    // 모듈온도
+                inverterId
         );
     }
 

@@ -62,7 +62,7 @@ public class SchedulerTest {
             dataProcessor.processJunctionBoxData(junctionBoxId, junctionBoxDataRequestDto, timestamp);
         }
 
-        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal();
+        SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal("1", 1L);
         dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
     }
 

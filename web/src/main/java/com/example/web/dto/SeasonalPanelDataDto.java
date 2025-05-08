@@ -10,6 +10,7 @@ public class SeasonalPanelDataDto {
     private Double externalTemperature;
     private Double horizontalInsolation; // 수평 일사량, 주로 사용됨
     private Double moduleSurfaceTemperature;
+    private Long inverterId;
     public EnvironmentResponseDto.Unit unit = new EnvironmentResponseDto.Unit();
 
     public SeasonalPanelDataDto(SeasonalPanelData seasonalPanelData) {
@@ -17,14 +18,16 @@ public class SeasonalPanelDataDto {
         this.externalTemperature = seasonalPanelData.getAmbientTemperature();
         this.horizontalInsolation = seasonalPanelData.getHorizontalIrradiance();
         this.moduleSurfaceTemperature = seasonalPanelData.getPanelTemperature();
+        this.inverterId = seasonalPanelData.getInverterId();
     }
 
     public SeasonalPanelDataDto(Double verticalInsolation, Double externalTemperature,
-                                Double horizontalInsolation, Double moduleSurfaceTemperature) {
+                                Double horizontalInsolation, Double moduleSurfaceTemperature, Long inverterId) {
         this.verticalInsolation = verticalInsolation;
         this.externalTemperature = externalTemperature;
         this.horizontalInsolation = horizontalInsolation;
         this.moduleSurfaceTemperature = moduleSurfaceTemperature;
+        this.inverterId = inverterId;
     }
 
     public static class Unit {

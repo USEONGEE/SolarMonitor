@@ -10,5 +10,5 @@ public interface DataRequester {
     ThreePhaseInverterDto requestThreePhaseData(Long inverterId);
     JunctionBoxDataRequestDto requestJunctionBoxData(Long inverterId);
 
-    SeasonalPanelDataDto requestSeasonal();
+    SeasonalPanelDataDto requestSeasonal(String port, Long inverterId);
 }
