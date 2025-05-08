@@ -36,6 +36,18 @@ public class SeasonalPanelDataService {
         return seasonalPanelDataRepository.findByCreatedDateBetween(startDate, endDate);
     }
 
+    public List<SeasonalPanelData> getSeasonalPanelData(
+            Long inverterId,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    ) {
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("시작일이 종료일보다 늦을 수 없습니다.");
+        }
+        return seasonalPanelDataRepository
+                .findByInverterIdAndCreatedDateBetween(inverterId, startDate, endDate);
+    }
+
     public SeasonalPanelData fetchLatest() {
         Pageable pageable = PageRequest.of(0, 1); // 가장 최근 데이터 1개만
         List<SeasonalPanelData> latestWeatherData = seasonalPanelDataRepository.findLatestWeatherData(pageable);

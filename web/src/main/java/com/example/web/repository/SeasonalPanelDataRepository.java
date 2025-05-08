@@ -16,4 +16,9 @@ public interface SeasonalPanelDataRepository extends JpaRepository<SeasonalPanel
 
     // 생성 시간이 주어진 시간 사이에
     List<SeasonalPanelData> findByCreatedDateBetween(LocalDateTime startDate, LocalDateTime endDate);
+
+    List<SeasonalPanelData>
+    findByInverterIdAndCreatedDateBetween(Long inverterId,
+                                          LocalDateTime start,
+                                          LocalDateTime end);
 }

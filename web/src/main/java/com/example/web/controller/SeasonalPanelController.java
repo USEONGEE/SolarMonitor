@@ -23,10 +23,28 @@ public class SeasonalPanelController {
 
 
     @GetMapping("/data")
-    public List<SeasonalPanelDataResponseDto> getSeasonalPanelData(@RequestParam(value = "startDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDateTime,
-                                                                   @RequestParam("endDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDateTime) {
-        List<SeasonalPanelData> seasonalPanelDataBetweenDates = seasonalPanelDataService.getSeasonalPanelDataBetweenDates(startDateTime, endDateTime);
-        return seasonalPanelDataBetweenDates.stream()
+    public List<SeasonalPanelDataResponseDto> getSeasonalPanelData(
+            @RequestParam(value = "inverterId", required = false) Long inverterId,
+            @RequestParam("startDateTime")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime startDateTime,
+            @RequestParam("endDateTime")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime endDateTime
+    ) {
+        List<SeasonalPanelData> data;
+
+        if (inverterId != null) {
+            // inverterId가 있으면 새로운 로직
+            data = seasonalPanelDataService
+                    .getSeasonalPanelData(inverterId, startDateTime, endDateTime);
+        } else {
+            // inverterId가 없으면 기존 로직
+            data = seasonalPanelDataService
+                    .getSeasonalPanelDataBetweenDates(startDateTime, endDateTime);
+        }
+
+        return data.stream()
                 .map(SeasonalPanelDataResponseDto::from)
                 .collect(Collectors.toList());
     }
