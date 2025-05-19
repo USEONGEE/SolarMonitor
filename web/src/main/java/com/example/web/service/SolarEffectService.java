@@ -88,7 +88,7 @@ public class SolarEffectService {
             List<InverterAccumulation> monthlyAcc = accumulationRepository
                     .findByInverterIdAndTypeAndDateBetween(
                             inverter.getId(),
-                            AccumulationType.MONTHLY,
+                            AccumulationType.DAILY,
                             startOfYear,
                             endOfLastMonth
                     );
