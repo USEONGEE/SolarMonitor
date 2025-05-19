@@ -7,6 +7,7 @@ import com.example.web.entity.InverterAccumulation;
 import com.example.web.repository.InverterAccumulationRepository;
 import com.example.web.repository.InverterRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SolarEffectService {
     private static final double CO2_EMISSION_FACTOR = 0.4594; // tCO2/kWh
     private static final double TREE_CO2_ABSORPTION_PER_YEAR = 17.5; // kg/year
@@ -111,6 +113,7 @@ public class SolarEffectService {
             // (최댓값 – 최솟값)을 전체 합산
             total += (maxEnergy - minEnergy);
         }
+        log.info("Total accumulation until last month: {}", total);
 
         return total;
     }
@@ -153,7 +156,7 @@ public class SolarEffectService {
             // (최댓값 – 최솟값)을 전체 합산
             total += (maxEnergy - minEnergy);
         }
-
+        log.info("Total accumulation this month: {}", total);
         return total;
     }
 }
