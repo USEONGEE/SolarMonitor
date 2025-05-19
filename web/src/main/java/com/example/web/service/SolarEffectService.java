@@ -24,28 +24,6 @@ public class SolarEffectService {
     private final InverterRepository inverterRepository;
 
 
-    // 누적 발전량 계산
-    public double getTotalAccumulationUntilLastMonth() {
-        LocalDateTime startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay();
-        LocalDateTime endOfLastMonth = LocalDate.now().withDayOfMonth(1).minusDays(1).atTime(23, 59, 59, 999999999);
-
-        List<Inverter> inverters = inverterRepository.findAll();
-
-        double sum = 0;
-        for (Inverter inverter : inverters) {
-            List<InverterAccumulation> yearlyAccumulations = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
-                    inverter.getId(),
-                    AccumulationType.MONTHLY,
-                    startOfYear,
-                    endOfLastMonth
-            );
-
-            sum += yearlyAccumulations.stream()
-                    .mapToDouble(InverterAccumulation::getCumulativeEnergy)
-                    .sum();
-        }
-        return sum;
-    }
 
     // CO2 절감량 계산
     public double calculateCO2Reduction(double generation) {
@@ -88,27 +66,93 @@ public class SolarEffectService {
         );
     }
 
-    // 이번 달 누적 발전량 조회
-    public Double getThisMonthAccumulation() {
-        LocalDateTime startDateTime = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endDateTime = LocalDate.now().atTime(23, 59, 59, 999999999);
+
+    // 누적 발전량 계산
+    public double getTotalAccumulationUntilLastMonth() {
+        // 올해 1월 1일 00:00
+        LocalDateTime startOfYear = LocalDate.now()
+                .withDayOfYear(1)
+                .atStartOfDay();
+        // 지난달 마지막 날 23:59:59.999999999
+        LocalDateTime endOfLastMonth = LocalDate.now()
+                .withDayOfMonth(1)
+                .minusDays(1)
+                .atTime(23, 59, 59, 999_999_999);
 
         List<Inverter> inverters = inverterRepository.findAll();
+        double total = 0.0;
 
-        double sum = 0;
         for (Inverter inverter : inverters) {
-            List<InverterAccumulation> monthlyAccumulations = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
-                    inverter.getId(),
-                    AccumulationType.DAILY,
-                    startDateTime,
-                    endDateTime
-            );
+            // Monthly 타입의 해당 기간 데이터 조회
+            List<InverterAccumulation> monthlyAcc = accumulationRepository
+                    .findByInverterIdAndTypeAndDateBetween(
+                            inverter.getId(),
+                            AccumulationType.MONTHLY,
+                            startOfYear,
+                            endOfLastMonth
+                    );
 
-            sum += monthlyAccumulations.stream()
+            if (monthlyAcc.isEmpty()) {
+                continue;
+            }
+
+            // cumulativeEnergy 기준 최대·최소 값 추출
+            double maxEnergy = monthlyAcc.stream()
                     .mapToDouble(InverterAccumulation::getCumulativeEnergy)
-                    .sum();
+                    .max()
+                    .orElse(0.0);
+
+            double minEnergy = monthlyAcc.stream()
+                    .mapToDouble(InverterAccumulation::getCumulativeEnergy)
+                    .min()
+                    .orElse(0.0);
+
+            // (최댓값 – 최솟값)을 전체 합산
+            total += (maxEnergy - minEnergy);
         }
 
-        return sum;
+        return total;
+    }
+    // 이번 달 누적 발전량 조회
+    public Double getThisMonthAccumulation() {
+        LocalDateTime startDateTime = LocalDate.now()
+                .withDayOfMonth(1)
+                .atStartOfDay();
+        LocalDateTime endDateTime = LocalDate.now()
+                .atTime(23, 59, 59, 999_999_999);
+
+        List<Inverter> inverters = inverterRepository.findAll();
+        double total = 0.0;
+
+        for (Inverter inverter : inverters) {
+            // 이 달 일별 DAILY 누적 데이터 전부를 가져온다
+            List<InverterAccumulation> accumulations =
+                    accumulationRepository.findByInverterIdAndTypeAndDateBetween(
+                            inverter.getId(),
+                            AccumulationType.DAILY,
+                            startDateTime,
+                            endDateTime
+                    );
+
+            if (accumulations.isEmpty()) {
+                continue;
+            }
+
+            // cumulativeEnergy 기준 최댓값과 최솟값을 스트림으로 구한다
+            double maxEnergy = accumulations.stream()
+                    .mapToDouble(InverterAccumulation::getCumulativeEnergy)
+                    .max()
+                    .orElse(0.0);
+
+            double minEnergy = accumulations.stream()
+                    .mapToDouble(InverterAccumulation::getCumulativeEnergy)
+                    .min()
+                    .orElse(0.0);
+
+            // (최댓값 – 최솟값)을 전체 합산
+            total += (maxEnergy - minEnergy);
+        }
+
+        return total;
     }
 }

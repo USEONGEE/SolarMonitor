@@ -29,7 +29,7 @@ public class SchedulerProd {
     private final DataProcessor dataProcessor;
     private final WeatherService weatherService;
 
-    @Scheduled(fixedRate = 60000) // 10초마다 실행
+    @Scheduled(fixedRate = 60000)
     public void fetchDataAndProcessProd() {
         LocalDateTime timestamp = LocalDateTime.now();
         log.info("fetch prod");
