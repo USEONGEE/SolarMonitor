@@ -77,8 +77,6 @@ public class SolarEffectService {
                 .withDayOfYear(1)
                 .atStartOfDay();
         LocalDateTime end = LocalDate.now()
-                .withDayOfMonth(1)
-                .minusDays(1)
                 .atTime(23, 59, 59, 999_999_999);
 
         return calculateDailyAccumulation(start, end);
