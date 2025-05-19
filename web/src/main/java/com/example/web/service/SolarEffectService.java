@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class SolarEffectService {
-    private static final double CO2_EMISSION_FACTOR = 0.4594; // tCO2/MWh
+    private static final double CO2_EMISSION_FACTOR = 0.4594; // tCO2/kWh
     private static final double TREE_CO2_ABSORPTION_PER_YEAR = 17.5; // kg/year
     private static final double OIL_CONVERSION_FACTOR = 0.213; // L/kWh
 
@@ -27,7 +27,8 @@ public class SolarEffectService {
 
     // CO2 절감량 계산
     public double calculateCO2Reduction(double generation) {
-        return generation * (CO2_EMISSION_FACTOR * 1000); // Convert MWh to kWh
+        //return generation * (CO2_EMISSION_FACTOR / 1000000); // Convert MWh to Wh
+        return (generation / 1000) * CO2_EMISSION_FACTOR ; // Convert wh to kWh
     }
 
     // 나무 심기 효과 계산
@@ -37,7 +38,7 @@ public class SolarEffectService {
 
     // 석유 절감량 계산
     public double calculateOilSaving(double generation) {
-        return generation * OIL_CONVERSION_FACTOR;
+        return (generation / 1000) * OIL_CONVERSION_FACTOR;
     }
 
     // 전체 프로세스 실행 및 DTO 반환
