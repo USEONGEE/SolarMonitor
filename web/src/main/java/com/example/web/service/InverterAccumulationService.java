@@ -42,9 +42,13 @@ public class InverterAccumulationService {
         List<InverterAccumulationDto> result = new ArrayList<>();
         Double prevCum = null;
         for (InverterAccumulation e : list) {
-            double delta = (prevCum == null)
-                    ? e.getCumulativeEnergy()    // 최초 시점: 누적값 그대로
-                    : e.getCumulativeEnergy() - prevCum;
+            double delta;
+            if (prevCum == null) {
+                // 첫 시점(00시)의 발전량은 항상 0으로
+                delta = 0.0;
+            } else {
+                delta = e.getCumulativeEnergy() - prevCum;
+            }
             prevCum = e.getCumulativeEnergy();
 
             result.add(new InverterAccumulationDto(
@@ -56,6 +60,7 @@ public class InverterAccumulationService {
         }
         return result;
     }
+
 
     public List<InverterAccumulationDto> getDailyAccumulations(Long inverterId, LocalDate month) {
         LocalDateTime start = month.atStartOfDay();
