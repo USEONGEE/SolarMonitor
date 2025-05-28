@@ -1,6 +1,6 @@
 package com.example.fetcher.schedular;
 
-import com.example.fetcher.schedular.utils.ModbusClient;
+import com.example.fetcher.schedular.utils.CrcCalculater;
 import com.example.fetcher.schedular.utils.RemsClient;
 import com.example.web.dto.JunctionBoxDataRequestDto;
 import com.example.web.dto.SeasonalPanelDataDto;
@@ -35,6 +35,7 @@ public class DataRequesterImpl implements DataRequester {
     private final JunctionBoxRepository junctionBoxRepository;
     private final JunctionBoxDataRepository junctionBoxDataRepository;
 //    private final ModbusClient modbusClient; // MODBUS 요청 (접속함)
+    private final CrcCalculater crcCalculater;      // CRC 계산기
     private final RemsClient remsClient; // REMS 요청 (인버터)
 
     @Override
@@ -78,34 +79,78 @@ public class DataRequesterImpl implements DataRequester {
     @Override
     @Transactional
     public JunctionBoxDataRequestDto requestJunctionBoxData(Long inverterId) {
-//        // 1️⃣ 인버터 ID로 접속함 조회
-//        List<JunctionBox> junctionBoxes = junctionBoxRepository.findByInverterId(inverterId);
-//
-//        if (junctionBoxes.isEmpty()) {
-//            throw new RuntimeException("해당 ID의 접속함이 존재하지 않습니다.");
-//        }
-//
-//        // 2️⃣ MODBUS 요청
-//        byte[] response = modbusClient.requestJunctionBox(inverterId, junctionBoxes.size());
-//
-//        // 3️⃣ 응답 데이터 파싱
-//        List<JunctionBoxDataRequestDto> dataList = parseJunctionBoxResponse(response);
-//
-//        // 4️⃣ 파싱된 데이터를 데이터베이스에 저장
-//        LocalDateTime timestamp = LocalDateTime.now();
-//        List<JunctionBoxData> savedDataList = new ArrayList<>();
-//
-//        for (int i = 0; i < junctionBoxes.size(); i++) {
-//            JunctionBox junctionBox = junctionBoxes.get(i);
-//            JunctionBoxDataRequestDto dto = dataList.get(i);
-//
-//            JunctionBoxData junctionBoxData = JunctionBoxData.fromDTO(junctionBox, dto, timestamp);
-//            savedDataList.add(junctionBoxData);
-//        }
-//
-//        junctionBoxDataRepository.saveAll(savedDataList);
+        Inverter inverter = inverterRepository.findById(inverterId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 인버터가 존재하지 않습니다."));
 
-        return null; // 반환값 없음.
+        // ID에 따라 포트 선택
+        long deviceId = inverter.getId();
+        String portName = deviceId == 1L ? "COM13" : "COM12";
+
+        SerialPort port = SerialPort.getCommPort(portName);
+        port.setBaudRate(9600);
+        port.setNumDataBits(8);
+        port.setParity(SerialPort.NO_PARITY);
+        port.setNumStopBits(SerialPort.ONE_STOP_BIT);
+        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
+
+        if (!port.openPort()) {
+            throw new RuntimeException("시리얼 포트를 열 수 없습니다: " + portName);
+        }
+
+        try {
+            // 1) 요청 패킷 생성: [ID, 0x03, 0x01, 0x05, 0x00, 0x04] + CRC
+            byte[] header = new byte[]{
+                    (byte) deviceId,
+                    0x03,
+                    0x01,
+                    0x05,
+                    0x00,
+                    0x04
+            };
+            int crc = crcCalculater.calculateCRC(header, header.length);
+            byte crcLow = (byte) (crc & 0xFF);
+            byte crcHigh = (byte) ((crc >> 8) & 0xFF);
+
+            byte[] request = new byte[8];
+            System.arraycopy(header, 0, request, 0, header.length);
+            request[6] = crcLow;
+            request[7] = crcHigh;
+
+            port.writeBytes(request, request.length);
+            log.info("접속함 요청 전송 ({}): {}", portName, DatatypeConverter.printHexBinary(request));
+
+            // 2) 응답 수신 (13바이트)
+            byte[] response = new byte[13];
+            int read = port.readBytes(response, response.length);
+            if (read != 13) {
+                throw new RuntimeException("응답 수신 실패: 길이 = " + read);
+            }
+            log.info("접속함 응답 수신: {}", DatatypeConverter.printHexBinary(response));
+
+            // 3) 파싱
+            List<JunctionBoxDataRequestDto> dataList = parseJunctionBoxResponse(response);
+
+            // DB 저장
+            List<JunctionBox> junctionBoxes = junctionBoxRepository.findByInverterId(inverterId);
+            int count = Math.min(dataList.size(), junctionBoxes.size());
+            List<JunctionBoxData> toSave = new ArrayList<>();
+
+            LocalDateTime now = LocalDateTime.now();
+            for (int i = 0; i < count; i++) {
+                JunctionBox box = junctionBoxes.get(i);
+                JunctionBoxDataRequestDto dto = dataList.get(i);
+                JunctionBoxData entity = JunctionBoxData.fromDTO(box, dto, now);
+                toSave.add(entity);
+            }
+            junctionBoxDataRepository.saveAll(toSave);
+
+            return dataList.get(0);
+
+        } catch (Exception e) {
+            throw new RuntimeException("접속함 데이터 요청 실패", e);
+        } finally {
+            port.closePort();
+        }
     }
 
 

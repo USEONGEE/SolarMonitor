@@ -54,7 +54,11 @@ public class SchedulerProd {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
 
+        for (JunctionBox junctionBox : junctionBoxRepository.findAll()) {
+            Long junctionBoxId = junctionBox.getId();
+            dataRequester.requestJunctionBoxData(junctionBoxId);
         }
 
         SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal("COM10", 1L);
