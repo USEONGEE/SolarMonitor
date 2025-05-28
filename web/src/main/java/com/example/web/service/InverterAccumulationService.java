@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,63 +27,94 @@ public class InverterAccumulationService {
      * @return 시간별 발전량 리스트
      */
     public List<InverterAccumulationDto> getHourlyAccumulations(Long inverterId, LocalDate date) {
-        LocalDateTime startDateTime = date.atStartOfDay();
-        LocalDateTime endDateTime = date.atTime(23, 59, 59, 999999999);
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(23, 59, 59, 999_999_999);
 
-        List<InverterAccumulation> hourlyAccumulations = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
-                inverterId,
-                AccumulationType.HOURLY,
-                startDateTime,
-                endDateTime
-        );
+        List<InverterAccumulation> list = accumulationRepository
+                .findByInverterIdAndTypeAndDateBetween(
+                        inverterId, AccumulationType.HOURLY, start, end
+                );
 
-        return hourlyAccumulations.stream()
-                .map(InverterAccumulationDto::fromEntity)
-                .collect(Collectors.toList());
+        // 1) 시간순 정렬
+        list.sort(Comparator.comparing(InverterAccumulation::getDate));
+
+        // 2) 이전 누적값을 빼서 Δ 계산
+        List<InverterAccumulationDto> result = new ArrayList<>();
+        Double prevCum = null;
+        for (InverterAccumulation e : list) {
+            double delta = (prevCum == null)
+                    ? e.getCumulativeEnergy()    // 최초 시점: 누적값 그대로
+                    : e.getCumulativeEnergy() - prevCum;
+            prevCum = e.getCumulativeEnergy();
+
+            result.add(new InverterAccumulationDto(
+                    inverterId,
+                    delta,
+                    e.getDate(),
+                    AccumulationType.HOURLY
+            ));
+        }
+        return result;
     }
 
-    /**
-     * 일별 발전량 조회
-     * @param inverterId 인버터 ID
-     * @param month 월의 첫 날
-     * @return 일별 발전량 리스트
-     */
     public List<InverterAccumulationDto> getDailyAccumulations(Long inverterId, LocalDate month) {
-        LocalDateTime startDateTime = month.atStartOfDay();
-        LocalDateTime endDateTime = month.withDayOfMonth(month.lengthOfMonth()).atTime(23, 59, 59, 999999999);
+        LocalDateTime start = month.atStartOfDay();
+        LocalDateTime end = month
+                .withDayOfMonth(month.lengthOfMonth())
+                .atTime(23, 59, 59, 999_999_999);
 
-        List<InverterAccumulation> dailyAccumulations = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
-                inverterId,
-                AccumulationType.DAILY,
-                startDateTime,
-                endDateTime
-        );
+        List<InverterAccumulation> list = accumulationRepository
+                .findByInverterIdAndTypeAndDateBetween(
+                        inverterId, AccumulationType.DAILY, start, end
+                );
 
-        return dailyAccumulations.stream()
-                .map(InverterAccumulationDto::fromEntity)
-                .collect(Collectors.toList());
+        list.sort(Comparator.comparing(InverterAccumulation::getDate));
+
+        List<InverterAccumulationDto> result = new ArrayList<>();
+        Double prevCum = null;
+        for (InverterAccumulation e : list) {
+            double delta = (prevCum == null)
+                    ? e.getCumulativeEnergy()
+                    : e.getCumulativeEnergy() - prevCum;
+            prevCum = e.getCumulativeEnergy();
+
+            result.add(new InverterAccumulationDto(
+                    inverterId,
+                    delta,
+                    e.getDate(),
+                    AccumulationType.DAILY
+            ));
+        }
+        return result;
     }
 
-    /**
-     * 월별 발전량 조회
-     * @param inverterId 인버터 ID
-     * @param year 연도
-     * @return 월별 발전량 리스트
-     */
     public List<InverterAccumulationDto> getMonthlyAccumulations(Long inverterId, int year) {
-        LocalDateTime startDateTime = LocalDate.of(year, 1, 1).atStartOfDay();
-        LocalDateTime endDateTime = LocalDate.of(year, 12, 31).atTime(23, 59, 59, 999999999);
+        LocalDateTime start = LocalDate.of(year, 1, 1).atStartOfDay();
+        LocalDateTime end = LocalDate.of(year, 12, 31).atTime(23, 59, 59, 999_999_999);
 
-        List<InverterAccumulation> monthlyAccumulations = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
-                inverterId,
-                AccumulationType.MONTHLY,
-                startDateTime,
-                endDateTime
-        );
+        List<InverterAccumulation> list = accumulationRepository
+                .findByInverterIdAndTypeAndDateBetween(
+                        inverterId, AccumulationType.MONTHLY, start, end
+                );
 
-        return monthlyAccumulations.stream()
-                .map(InverterAccumulationDto::fromEntity)
-                .collect(Collectors.toList());
+        list.sort(Comparator.comparing(InverterAccumulation::getDate));
+
+        List<InverterAccumulationDto> result = new ArrayList<>();
+        Double prevCum = null;
+        for (InverterAccumulation e : list) {
+            double delta = (prevCum == null)
+                    ? e.getCumulativeEnergy()
+                    : e.getCumulativeEnergy() - prevCum;
+            prevCum = e.getCumulativeEnergy();
+
+            result.add(new InverterAccumulationDto(
+                    inverterId,
+                    delta,
+                    e.getDate(),
+                    AccumulationType.MONTHLY
+            ));
+        }
+        return result;
     }
 
     // 이번 달 누적 발전량 조회
