@@ -56,11 +56,6 @@ public class SchedulerProd {
             }
         }
 
-        for (JunctionBox junctionBox : junctionBoxRepository.findAll()) {
-            Long junctionBoxId = junctionBox.getId();
-            dataRequester.requestJunctionBoxData(junctionBoxId);
-        }
-
         SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal("COM10", 1L);
         dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
         log.info("seasonalPanelDataDto: {}", seasonalPanelDataDto);
