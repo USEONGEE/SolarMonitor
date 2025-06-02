@@ -1,0 +1,9 @@
+FROM python:3.10-slim
+
+WORKDIR /home/gradle/project
+
+COPY weather_ingest.py .
+
+RUN pip install requests pymysql schedule
+
+CMD ["python", "weather_ingest.py"]

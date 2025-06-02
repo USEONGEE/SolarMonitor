@@ -37,6 +37,16 @@ services:
     networks:
       - energy-network
 
+#  weather-fetcher:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile-python
+#    container_name: weather-fetcher
+#    depends_on:
+#      - mysql
+#    networks:
+#      - energy-network
+
 networks:
   energy-network:
     driver: bridge
