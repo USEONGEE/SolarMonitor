@@ -37,18 +37,17 @@ public class InverterDetailResponseDto {
      * InverterData 엔티티와 월 누적 발전량을 기반으로 InverterDetailResponseDto 생성
      *
      * @param data                   변환할 InverterData 엔티티
-     * @param totalMonthlyCumulativeEnergy 월 누적 발전량
      * @return InverterDetailResponseDto 객체
      */
-    public static InverterDetailResponseDto fromInverterData(InverterData data, Double totalMonthlyCumulativeEnergy) {
+    public static InverterDetailResponseDto fromInverterData(InverterData data, Double todayGeneration) {
         return new InverterDetailResponseDto(
                 data.getInverter().getId(),
                 data.getPvVoltage(),
                 data.getPvCurrent(),
                 data.getPvPower(),
-                data.getCumulativeEnergy(),
+                todayGeneration,
                 data.getTimestamp(),
-                totalMonthlyCumulativeEnergy
+                data.getCumulativeEnergy()
         );
     }
 }

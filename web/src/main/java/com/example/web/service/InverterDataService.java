@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -70,28 +71,58 @@ public class InverterDataService {
      *
      * @param inverterId
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public InverterDetailResponseDto getInverterDetail(Long inverterId) {
-        // 인버터 존재 여부 확인
+        // 1) 인버터 존재 여부 확인
         Inverter inverter = inverterRepository.findById(inverterId)
                 .orElseThrow(() -> new RuntimeException("인버터가 존재하지 않습니다. ID: " + inverterId));
 
-        // 최신 InverterData 조회
-        InverterData latestData = inverterDataRepository.findTopByInverterIdOrderByTimestampDesc(inverterId)
+        // 2) 최신 InverterData (실시간 스냅샷) 조회
+        InverterData latestData = inverterDataRepository
+                .findTopByInverterIdOrderByTimestampDesc(inverterId)
                 .orElseThrow(() -> new RuntimeException("인버터의 데이터가 존재하지 않습니다. ID: " + inverterId));
 
-        // 월별 누적 발전량 합산
-        Double totalMonthlyCumulativeEnergy = accumulationRepository.findByInverterIdAndTypeAndDateBetween(
-                        inverterId,
-                        AccumulationType.MONTHLY,
-                        LocalDateTime.of(LocalDate.now().getYear(), 1, 1, 0, 0),
-                        LocalDateTime.of(LocalDate.now().getYear(), 12, 31, 23, 59, 59, 999999999)
-                ).stream()
-                .mapToDouble(InverterAccumulation::getCumulativeEnergy)
-                .sum() + latestData.getCumulativeEnergy();
+        // 3) 오늘 시작 시각(00:00)과 어제 마지막 시각(23:59:59) 계산
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfToday = today.atStartOfDay();
+        // “어제 마지막” = “오늘 00:00” 바로 전 1초
+        LocalDateTime endOfYesterday = startOfToday.minusSeconds(1);
 
-        // DTO 생성 및 반환
-        return InverterDetailResponseDto.fromInverterData(latestData, totalMonthlyCumulativeEnergy);
+        // 4) 오늘 마지막 누적 → latestData 에서 timestamp가 startOfToday 이후인 가장 최신 레코드
+        //    (만약 오늘 사이클에 스냅샷이 여러 건 저장되었다면, findTopBy…BetweenOrderByTimestampDesc 사용)
+        Optional<InverterData> latestTodayOpt = inverterDataRepository
+                .findTopByInverterIdAndTimestampBetweenOrderByTimestampDesc(
+                        inverterId,
+                        startOfToday,
+                        LocalDateTime.now()
+                );
+
+        // 5) 어제 마지막 누적 → endOfYesterday 이전(timestamp < startOfToday)의 가장 최신 레코드
+        Optional<InverterData> latestYesterdayOpt = inverterDataRepository
+                .findTopByInverterIdAndTimestampBeforeOrderByTimestampDesc(
+                        inverterId,
+                        endOfYesterday
+                );
+
+        // 6) 오늘 발전량 계산 (diff)
+        double todayGeneration;
+        if (latestTodayOpt.isPresent()) {
+            double todayCum = latestTodayOpt.get().getCumulativeEnergy();
+            double prevCum = latestYesterdayOpt
+                    .map(InverterData::getCumulativeEnergy)
+                    .orElse(0.0);
+            todayGeneration = todayCum - prevCum;
+        } else {
+            // 오늘 스냅샷이 없으면 발전량 0으로 간주
+            todayGeneration = 0.0;
+        }
+
+        // 7) DTO 생성 및 반환 (여기에 cumulativeEnergy는 latestData.getCumulativeEnergy()로 전달하고,
+        //    totalMonthlyCumulativeEnergy 대신 todayGeneration을 넘김)
+        return InverterDetailResponseDto.fromInverterData(
+                latestData,
+                todayGeneration
+        );
     }
 
     /**
