@@ -61,9 +61,69 @@ public class InverterDataService {
     /**
      * 모든 인버터의 최신 데이터 조회
      */
-    // TODO 나중에 인버터 갯수가 많아진다면 한 번에 조회하도록 해야함.
     public List<InvertersDataResponseDto> getAllInvertersLatestData() {
-        return inverterDataRepository.findAllLatestInverterData();
+        List<InvertersDataResponseDto> responseList = new ArrayList<>();
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfToday = today.atStartOfDay();
+        // 어제 마지막 시각 = 오늘 00:00 이전 1초
+        LocalDateTime endOfYesterday = startOfToday.minusSeconds(1);
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1) 모든 인버터 목록을 가져온 뒤, 각각에 대해 실시간 데이터와 오늘 누적을 계산
+        List<Inverter> inverters = inverterRepository.findAll();
+        for (Inverter inv : inverters) {
+            Long inverterId = inv.getId();
+
+            // 2) 오늘 최신 스냅샷 (00:00 이후 ~ 지금 사이)
+            Optional<InverterData> latestTodayOpt = inverterDataRepository
+                    .findTopByInverterIdAndTimestampBetweenOrderByTimestampDesc(
+                            inverterId,
+                            startOfToday,
+                            now
+                    );
+
+            // 3) 어제 마지막 스냅샷 (< 오늘 00:00)
+            Optional<InverterData> latestYesterdayOpt = inverterDataRepository
+                    .findTopByInverterIdAndTimestampBeforeOrderByTimestampDesc(
+                            inverterId,
+                            endOfYesterday
+                    );
+
+            double todayGeneration;
+            double realtimeKw = 0.0;
+            LocalDateTime timestamp = null;
+
+            if (latestTodayOpt.isPresent()) {
+                InverterData todayData = latestTodayOpt.get();
+                // (a) 오늘 누적 에너지
+                double todayCum = todayData.getCumulativeEnergy();
+                // (b) 어제 누적 에너지 (없으면 0)
+                double prevCum = latestYesterdayOpt
+                        .map(InverterData::getCumulativeEnergy)
+                        .orElse(0.0);
+                // (c) 오늘 발전량 = (오늘 누적) - (어제 누적)
+                todayGeneration = todayCum - prevCum;
+
+                // 실시간 전력량(kW)과 타임스탬프는 오늘 최신 스냅샷 기준
+                realtimeKw = todayData.getPvPower() / 1000.0;
+                timestamp = todayData.getTimestamp();
+            } else {
+                // 오늘 데이터가 아예 없으면, 발전량 0으로 간주
+                todayGeneration = 0.0;
+                // 실시간 전력량도 없으므로 그대로 0, timestamp는 null
+            }
+
+            // 4) DTO 생성 후 목록에 추가
+            responseList.add(new InvertersDataResponseDto(
+                    inverterId,
+                    realtimeKw,
+                    todayGeneration,
+                    timestamp
+            ));
+        }
+
+        return responseList;
     }
 
     /**
