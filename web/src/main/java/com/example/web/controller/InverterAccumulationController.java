@@ -56,7 +56,6 @@ public class InverterAccumulationController {
 
         return ResponseEntity.ok(accumulationService.getDailyAccumulations(inverterId, localDate));
     }
-
     /**
      * 월별 발전량 조회 엔드포인트
      * @param inverterId 인버터 ID

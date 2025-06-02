@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface InverterAccumulationRepository extends JpaRepository<InverterAccumulation, Long> {
     List<InverterAccumulation> findByInverterIdAndType(Long inverterId, AccumulationType type);
@@ -31,5 +32,13 @@ public interface InverterAccumulationRepository extends JpaRepository<InverterAc
     List<InverterAccumulation> findByTypeAndDateBetween(AccumulationType type, LocalDateTime startDate, LocalDateTime endDate);
 
     List<InverterAccumulation> findByType(AccumulationType type);
+
+
+    // (추가) 조회 기간 시작 전에 가장 가까운 한 건을 가져오기 (이전 날짜의 마지막 스냅샷)
+    Optional<InverterAccumulation> findTopByInverterIdAndTypeAndDateBeforeOrderByDateDesc(
+            Long inverterId, AccumulationType type, LocalDateTime before
+    );
+
+
 
 }

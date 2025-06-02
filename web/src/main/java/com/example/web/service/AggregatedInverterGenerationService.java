@@ -36,9 +36,9 @@ public class AggregatedInverterGenerationService {
     public AggregatedInverterGenerationDto getAggregatedGeneration() {
         Double todayGeneration = calculateTodayGeneration();
         Double previousDayGeneration = calculatePreviousDayGeneration();
-        Double monthlyGeneration = calculateMonthlyGeneration();
-        Double previousMonthGeneration = calculatePreviousMonthGeneration();
-        Double yearlyGeneration = calculateYearlyGeneration();
+        Double monthlyGeneration = calculateMonthlyGeneration(); // 이번달
+        Double previousMonthGeneration = calculatePreviousMonthGeneration(); // 저번달
+        Double yearlyGeneration = calculateYearlyGeneration(); // 올해
         Double previousYearGeneration = calculatePreviousYearGeneration();
         Double cumulativeGeneration = calculateCumulativeGeneration();
         Double totalCurrentOutput = calculateTotalCurrentOutput();

@@ -44,4 +44,14 @@ public interface InverterDataRepository extends JpaRepository<InverterData, Long
 
     @Query("SELECT COUNT(d) FROM InverterData d WHERE d.currentOutput > 0 AND d.inverter.id = :inverterId AND d.timestamp BETWEEN :startDate AND :endDate")
     Long countByInverterIdAndTimestampBetween(Long inverterId, LocalDateTime startDate, LocalDateTime endDate);
+
+    /**
+     * 주어진 inverterId, timestamp < before 인 조건에서
+     * timestamp가 가장 큰 한 건을 반환한다.
+     * (보통 이전 날짜의 마지막 스냅샷을 구할 때 사용)
+     */
+    Optional<InverterData> findTopByInverterIdAndTimestampBeforeOrderByTimestampDesc(
+            Long inverterId,
+            LocalDateTime before
+    );
 }
