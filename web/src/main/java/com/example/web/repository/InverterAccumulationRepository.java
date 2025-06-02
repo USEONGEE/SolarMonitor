@@ -39,6 +39,18 @@ public interface InverterAccumulationRepository extends JpaRepository<InverterAc
             Long inverterId, AccumulationType type, LocalDateTime before
     );
 
+    /**
+     * 지정한 inverterId, type, date 범위 내에서
+     * date를 내림차순 정렬 후 첫 번째 한 건만 가져온다.
+     * (예: 특정 날짜 범위에 해당하는 DAILY 스냅샷 중 마지막 레코드)
+     */
+    Optional<InverterAccumulation> findTopByInverterIdAndTypeAndDateBetweenOrderByDateDesc(
+            Long inverterId,
+            AccumulationType type,
+            LocalDateTime start,
+            LocalDateTime end
+    );
+
 
 
 }
