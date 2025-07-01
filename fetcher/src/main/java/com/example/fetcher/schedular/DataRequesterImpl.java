@@ -127,8 +127,12 @@ public class DataRequesterImpl implements DataRequester {
             }
             log.info("접속함 응답 수신: {}", DatatypeConverter.printHexBinary(response));
 
+
             // 3) 파싱
             List<JunctionBoxDataRequestDto> dataList = parseJunctionBoxResponse(response);
+            log.info("requestJunctionBoxData");
+            log.info(String.valueOf(dataList));
+
 
             // DB 저장
             List<JunctionBox> junctionBoxes = junctionBoxRepository.findByInverterId(inverterId);
@@ -338,10 +342,30 @@ public class DataRequesterImpl implements DataRequester {
             int voltage = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
             int current = ((response[index + 2] & 0xFF) << 8) | (response[index + 3] & 0xFF);
 
+//            int voltageRaw = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
+//            int currentRaw = ((response[index + 2] & 0xFF) << 8) | (response[index + 3] & 0xFF);
+//
+//            double voltage = voltageRaw;
+//            double current = (short)currentRaw;
+
+//            여기서 2ch 전류가 654.37A로 출력된 것은, FF 9D를 unsigned int로 해석했을 때 65437 → 654.37A이기 때문임
+//            정확하게는 signed short로 변환하여 -0.99A가 되어야 맞음
+//            즉, 코드에서 current 파싱 시 (short) 캐스팅이 필요함
+            if (current < 0) {
+                current = 0;
+            }
+
             dataList.add(new JunctionBoxDataRequestDto(voltage / 10.0, current / 100.0));
             index += 4;
         }
 
         return dataList;
+
+        // 1ch(index 0), 3ch(index 2)만 선택
+//        List<JunctionBoxDataRequestDto> filteredList = new ArrayList<>();
+//        if (dataList.size() >= 1) filteredList.add(dataList.get(0));  // 1ch
+//        if (dataList.size() >= 3) filteredList.add(dataList.get(2));  // 3ch
+//
+//        return filteredList;
     }
 }

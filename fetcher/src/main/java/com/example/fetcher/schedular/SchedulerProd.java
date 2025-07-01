@@ -8,6 +8,7 @@ import com.example.web.entity.Inverter;
 import com.example.web.entity.JunctionBox;
 import com.example.web.repository.InverterRepository;
 import com.example.web.repository.JunctionBoxRepository;
+import com.example.web.service.Weather2Service;
 import com.example.web.service.WeatherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class SchedulerProd {
     private final DataRequester dataRequester;
     private final DataProcessor dataProcessor;
     private final WeatherService weatherService;
+    private final Weather2Service weather2Service;
 
     @Scheduled(fixedRate = 60000)
     public void fetchDataAndProcessProd() {
@@ -69,6 +71,10 @@ public class SchedulerProd {
     @Scheduled(cron = "0 0 * * * *")
     public void fetchWeatherData() {
         weatherService.fetchAndSaveWeatherData();
+
+        LocalDateTime now = LocalDateTime.now().minusHours(1); // 한 시간 전 기준
+        String tm = now.format(java.time.format.DateTimeFormatter.ofPattern("yyMMddHHmm"));
+        weather2Service.fetchAndSave(tm);
     }
 
 }
