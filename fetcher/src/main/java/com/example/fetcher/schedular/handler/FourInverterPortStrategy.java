@@ -42,42 +42,37 @@ public class FourInverterPortStrategy extends InverterPortStrategy {
             }
 
             List<JunctionBoxDataRequestDto> result = new ArrayList<>();
-            for (int i = 0; i <= 1; i++) {
-                byte[] header = new byte[]{
-                        (byte) deviceId,
-                        0x03,
-                        0x01,
-                        0x05,
-                        (byte) (5*i),
-                        (byte) (5*i + 4)
-                };
-                int crc = crcCalculater.calculateCRC(header, header.length);
-                byte crcLow = (byte) (crc & 0xFF);
-                byte crcHigh = (byte) ((crc >> 8) & 0xFF);
+            byte[] header = new byte[]{
+                    (byte) deviceId,
+                    0x03,
+                    0x01,
+                    0x05,
+                    (byte) 0,
+                    (byte) 9
+            };
+            int crc = crcCalculater.calculateCRC(header, header.length);
+            byte crcLow = (byte) (crc & 0xFF);
+            byte crcHigh = (byte) ((crc >> 8) & 0xFF);
 
-                byte[] request = new byte[8];
-                System.arraycopy(header, 0, request, 0, header.length);
-                request[6] = crcLow;
-                request[7] = crcHigh;
+            byte[] request = new byte[8];
+            System.arraycopy(header, 0, request, 0, header.length);
+            request[6] = crcLow;
+            request[7] = crcHigh;
 
-                port.writeBytes(request, request.length);
-                log.info("접속함 요청 전송 ({}): {}", portName, DatatypeConverter.printHexBinary(request));
+            port.writeBytes(request, request.length);
+            log.info("접속함 요청 전송 ({}): {}", portName, DatatypeConverter.printHexBinary(request));
 
-                // 2) 응답 수신 (13바이트)
-                byte[] response = new byte[13];
-                int read = port.readBytes(response, response.length);
-                if (read != 13) {
-                    throw new RuntimeException("응답 수신 실패: 길이 = " + read);
-                }
-                log.info("접속함 응답 수신: {}", DatatypeConverter.printHexBinary(response));
-
-
-                // 3) 파싱
-                List<JunctionBoxDataRequestDto> dataList = this.parseJunctionBoxResponse(response);
-                result.addAll(dataList);
+            // 2) 응답 수신 (13바이트)
+            byte[] response = new byte[13];
+            int read = port.readBytes(response, response.length);
+            if (read != 13) {
+                throw new RuntimeException("응답 수신 실패: 길이 = " + read);
             }
+            log.info("접속함 응답 수신: {}", DatatypeConverter.printHexBinary(response));
 
-            log.info("requestJunctionBoxData");
+            List<JunctionBoxDataRequestDto> dataList = this.parseJunctionBoxResponse(response);
+            log.info("접속함 데이터 파싱 결과: {}", dataList);
+
             log.info(String.valueOf(result));
             return result;
         } catch (Exception e) {
