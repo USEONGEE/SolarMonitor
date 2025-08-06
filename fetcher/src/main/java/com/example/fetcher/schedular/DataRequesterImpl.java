@@ -111,7 +111,7 @@ public class DataRequesterImpl implements DataRequester {
                     toSave.add(entity);
                 }
                 junctionBoxDataRepository.saveAll(toSave);
-
+                return null;
             }
         }
         throw new RuntimeException("해당 ID의 인버터에 대한 접합 박스 전략이 없습니다.");
