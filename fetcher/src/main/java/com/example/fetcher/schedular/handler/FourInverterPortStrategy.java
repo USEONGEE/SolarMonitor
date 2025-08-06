@@ -64,7 +64,7 @@ public class FourInverterPortStrategy extends InverterPortStrategy {
             // 2) 응답 수신 (17바이트)
             byte[] response = new byte[17];
             int read = port.readBytes(response, response.length);
-            if (read != 13) {
+            if (read != 17) {
                 throw new RuntimeException("응답 수신 실패: 길이 = " + read);
             }
             log.info("접속함 응답 수신: {}", DatatypeConverter.printHexBinary(response));
