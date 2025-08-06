@@ -2,6 +2,7 @@ package com.example.fetcher.schedular.utils;
 
 import com.example.fetcher.schedular.handler.InverterPortStrategy;
 import com.fazecast.jSerialComm.SerialPort;
+import jakarta.xml.bind.DatatypeConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,7 +90,7 @@ public class RemsClient {
         int crc = crcCalculater.calculateCRC(request, 3);
         request[3] = (byte) (crc & 0xFF);
         request[4] = (byte) ((crc >> 8) & 0xFF);
-        log.info("삼상 인버터 요청 패킷: {}", request);
+        log.info("삼상 인버터 요청 패킷: {}", DatatypeConverter.printHexBinary(request));
 
 
         for (InverterPortStrategy strategy : strategies) {

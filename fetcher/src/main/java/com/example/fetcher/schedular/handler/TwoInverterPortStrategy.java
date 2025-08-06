@@ -24,8 +24,8 @@ public class TwoInverterPortStrategy extends InverterPortStrategy {
     @Override
     public String getPortNameByInverterId(long inverterId) {
         return switch ((int) inverterId) {
-            case 1 -> "COM12"; // 첫 번째 접합 박스
-            case 2 -> "COM13"; // 두 번째 접합 박스
+            case 1 -> "COM13"; // 첫 번째 접합 박스
+            case 2 -> "COM12"; // 두 번째 접합 박스
             case 3 -> "COM18"; // 세 번째 접합 박스
             default -> throw new IllegalArgumentException("지원하지 않는 장치 ID: " + inverterId);
         };
