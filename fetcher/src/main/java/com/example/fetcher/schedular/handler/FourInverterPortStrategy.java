@@ -48,7 +48,7 @@ public class FourInverterPortStrategy extends InverterPortStrategy {
                         0x03,
                         0x01,
                         0x05,
-                        (byte) (5*i + 1),
+                        (byte) (5*i),
                         (byte) (5*i + 4)
                 };
                 int crc = crcCalculater.calculateCRC(header, header.length);
