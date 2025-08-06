@@ -1,5 +1,6 @@
 package com.example.fetcher.schedular;
 
+import com.example.fetcher.schedular.handler.InverterPortStrategy;
 import com.example.fetcher.schedular.utils.CrcCalculater;
 import com.example.fetcher.schedular.utils.RemsClient;
 import com.example.web.dto.JunctionBoxDataRequestDto;
@@ -34,9 +35,10 @@ public class DataRequesterImpl implements DataRequester {
     private final InverterDataRepository inverterDataRepository;
     private final JunctionBoxRepository junctionBoxRepository;
     private final JunctionBoxDataRepository junctionBoxDataRepository;
-//    private final ModbusClient modbusClient; // MODBUS 요청 (접속함)
     private final CrcCalculater crcCalculater;      // CRC 계산기
     private final RemsClient remsClient; // REMS 요청 (인버터)
+
+    private final List<InverterPortStrategy> inverterPortStrategies;
 
     @Override
     @Transactional
@@ -84,84 +86,42 @@ public class DataRequesterImpl implements DataRequester {
 
         // ID에 따라 포트 선택
         long deviceId = inverter.getId();
-        String portName = deviceId == 1L ? "COM13" : "COM12";
+        for (InverterPortStrategy strategy : inverterPortStrategies) {
+            if (strategy.support(deviceId)) {
+                // 포트 조회
+                String portName = strategy.getPortNameByInverterId(deviceId);
 
-        SerialPort port = SerialPort.getCommPort(portName);
-        port.setBaudRate(9600);
-        port.setNumDataBits(8);
-        port.setParity(SerialPort.NO_PARITY);
-        port.setNumStopBits(SerialPort.ONE_STOP_BIT);
-        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
+                // 데이터 가져오기
+                List<JunctionBoxDataRequestDto> dataList = strategy.requestJunctionBoxData(deviceId, portName);// 요청 메소드 호출
 
-        if (!port.openPort()) {
-            throw new RuntimeException("시리얼 포트를 열 수 없습니다: " + portName);
-        }
+                log.info("requestJunctionBoxData");
+                log.info(String.valueOf(dataList));
 
-        try {
-            // 1) 요청 패킷 생성: [ID, 0x03, 0x01, 0x05, 0x00, 0x04] + CRC
-            byte[] header = new byte[]{
-                    (byte) deviceId,
-                    0x03,
-                    0x01,
-                    0x05,
-                    0x00,
-                    0x04
-            };
-            int crc = crcCalculater.calculateCRC(header, header.length);
-            byte crcLow = (byte) (crc & 0xFF);
-            byte crcHigh = (byte) ((crc >> 8) & 0xFF);
+                // DB 저장
+                List<JunctionBox> junctionBoxes = junctionBoxRepository.findByInverterId(inverterId);
+                int count = Math.min(dataList.size(), junctionBoxes.size());
+                List<JunctionBoxData> toSave = new ArrayList<>();
 
-            byte[] request = new byte[8];
-            System.arraycopy(header, 0, request, 0, header.length);
-            request[6] = crcLow;
-            request[7] = crcHigh;
+                LocalDateTime now = LocalDateTime.now();
+                for (int i = 0; i < count; i++) {
+                    JunctionBox box = junctionBoxes.get(i);
+                    JunctionBoxDataRequestDto dto = dataList.get(i);
+                    JunctionBoxData entity = JunctionBoxData.fromDTO(box, dto, now);
+                    toSave.add(entity);
+                }
+                junctionBoxDataRepository.saveAll(toSave);
 
-            port.writeBytes(request, request.length);
-            log.info("접속함 요청 전송 ({}): {}", portName, DatatypeConverter.printHexBinary(request));
-
-            // 2) 응답 수신 (13바이트)
-            byte[] response = new byte[13];
-            int read = port.readBytes(response, response.length);
-            if (read != 13) {
-                throw new RuntimeException("응답 수신 실패: 길이 = " + read);
             }
-            log.info("접속함 응답 수신: {}", DatatypeConverter.printHexBinary(response));
-
-
-            // 3) 파싱
-            List<JunctionBoxDataRequestDto> dataList = parseJunctionBoxResponse(response);
-            log.info("requestJunctionBoxData");
-            log.info(String.valueOf(dataList));
-
-
-            // DB 저장
-            List<JunctionBox> junctionBoxes = junctionBoxRepository.findByInverterId(inverterId);
-            int count = Math.min(dataList.size(), junctionBoxes.size());
-            List<JunctionBoxData> toSave = new ArrayList<>();
-
-            LocalDateTime now = LocalDateTime.now();
-            for (int i = 0; i < count; i++) {
-                JunctionBox box = junctionBoxes.get(i);
-                JunctionBoxDataRequestDto dto = dataList.get(i);
-                JunctionBoxData entity = JunctionBoxData.fromDTO(box, dto, now);
-                toSave.add(entity);
-            }
-            junctionBoxDataRepository.saveAll(toSave);
-
-            return dataList.get(0);
-
-        } catch (Exception e) {
-            throw new RuntimeException("접속함 데이터 요청 실패", e);
-        } finally {
-            port.closePort();
         }
+        throw new RuntimeException("해당 ID의 인버터에 대한 접합 박스 전략이 없습니다.");
     }
 
 
     @Override
     public SeasonalPanelDataDto requestSeasonal(String port, Long inverterId) {
         // COM10 포트를 사용 (필요에 따라 포트 이름과 통신 파라미터 조정)
-        SerialPort port1 = SerialPort.getCommPort("COM10");
+        SerialPort port1 = SerialPort.getCommPort(port);
+
         port1.setBaudRate(9600);
         port1.setNumDataBits(8);
         port1.setParity(SerialPort.NO_PARITY);
@@ -342,15 +302,6 @@ public class DataRequesterImpl implements DataRequester {
             int voltage = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
             int current = ((response[index + 2] & 0xFF) << 8) | (response[index + 3] & 0xFF);
 
-//            int voltageRaw = ((response[index] & 0xFF) << 8) | (response[index + 1] & 0xFF);
-//            int currentRaw = ((response[index + 2] & 0xFF) << 8) | (response[index + 3] & 0xFF);
-//
-//            double voltage = voltageRaw;
-//            double current = (short)currentRaw;
-
-//            여기서 2ch 전류가 654.37A로 출력된 것은, FF 9D를 unsigned int로 해석했을 때 65437 → 654.37A이기 때문임
-//            정확하게는 signed short로 변환하여 -0.99A가 되어야 맞음
-//            즉, 코드에서 current 파싱 시 (short) 캐스팅이 필요함
             if (current < 0) {
                 current = 0;
             }
@@ -360,12 +311,5 @@ public class DataRequesterImpl implements DataRequester {
         }
 
         return dataList;
-
-        // 1ch(index 0), 3ch(index 2)만 선택
-//        List<JunctionBoxDataRequestDto> filteredList = new ArrayList<>();
-//        if (dataList.size() >= 1) filteredList.add(dataList.get(0));  // 1ch
-//        if (dataList.size() >= 3) filteredList.add(dataList.get(2));  // 3ch
-//
-//        return filteredList;
     }
 }

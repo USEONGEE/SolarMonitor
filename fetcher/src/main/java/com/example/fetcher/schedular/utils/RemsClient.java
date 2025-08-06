@@ -1,17 +1,22 @@
 package com.example.fetcher.schedular.utils;
 
-import com.example.fetcher.schedular.utils.CrcCalculater;
+import com.example.fetcher.schedular.handler.InverterPortStrategy;
 import com.fazecast.jSerialComm.SerialPort;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Slf4j
 @Profile("prod")
+@RequiredArgsConstructor
 public class RemsClient {
 
+    private final List<InverterPortStrategy> strategies;
     private final CrcCalculater crcCalculater;
 
     // 시리얼 포트 이름 (예: COM3, /dev/ttyUSB0)
@@ -35,22 +40,19 @@ public class RemsClient {
     // 시리얼 포트 읽기 타임아웃 (ms)
     private static final int READ_TIMEOUT_MS = 2000;
 
-    public RemsClient(CrcCalculater crcCalculater) {
-        this.crcCalculater = crcCalculater;
-    }
 
     /**
      * 단상 인버터 데이터 요청:
      * 요청 패킷: SOP(0x7E), 인버터ID, 명령(0x01), CRC High, CRC Low
      * 응답 길이는 단상의 경우 26바이트로 예상합니다.
      */
-    public byte[] requestSinglePhase(Long id) {
+    public byte[] requestSinglePhase(Long inverterId) {
         byte[] request = new byte[5];
         request[0] = 0x7E;
         try {
-            request[1] = id.byteValue();
+            request[1] = inverterId.byteValue();
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("유효하지 않은 id: " + id, e);
+            throw new IllegalArgumentException("유효하지 않은 inverterId: " + inverterId, e);
         }
         request[2] = 0x01; // 단상 명령
         int crc = crcCalculater.calculateCRC(request, 3);
@@ -60,13 +62,14 @@ public class RemsClient {
         log.info("단상 인버터 요청 패킷: {}", request);
 
         log.info("단상 인버터 요청 패킷: {}", request);
-        if (id == 1L) {
-            return sendRequestSerial(request, 31, "COM12"); // 26 + 5
-        } else if (id == 2L) {
-            return sendRequestSerial(request, 31, "COM13");
-        } else {
-            throw new IllegalArgumentException("유효하지 않은 id: " + id);
+        for (InverterPortStrategy strategy : strategies) {
+            if (strategy.support(inverterId)) {
+                log.info("단상 인버터 요청 포트: {}", strategy.getPortNameByInverterId(inverterId));
+                return sendRequestSerial(request, 31, strategy.getPortNameByInverterId(inverterId));
+            }
         }
+
+        throw new IllegalArgumentException("유효하지 않은 inverterId: " + inverterId);
     }
 
     /**
@@ -74,13 +77,13 @@ public class RemsClient {
      * 요청 패킷: SOP(0x7E), 인버터ID, 명령(0x07), CRC High, CRC Low
      * 응답 길이는 삼상의 경우 38바이트로 예상합니다.
      */
-    public byte[] requestThreePhase(Long id) {
+    public byte[] requestThreePhase(Long inverterId) {
         byte[] request = new byte[5];
         request[0] = 0x7E;
         try {
-            request[1] = id.byteValue();
+            request[1] = inverterId.byteValue();
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("유효하지 않은 id: " + id, e);
+            throw new IllegalArgumentException("유효하지 않은 inverterId: " + inverterId, e);
         }
         request[2] = 0x07; // 삼상 명령
         int crc = crcCalculater.calculateCRC(request, 3);
@@ -88,22 +91,21 @@ public class RemsClient {
         request[4] = (byte) ((crc >> 8) & 0xFF);
         log.info("삼상 인버터 요청 패킷: {}", request);
 
-        if (id == 1L) {
-            log.info("COM13");
-            return sendRequestSerial(request, 43, "COM13"); // 38 + 5
-        } else if (id == 2L) {
-            log.info("COM12");
-            return sendRequestSerial(request, 43, "COM12");
-        } else {
-            throw new IllegalArgumentException("유효하지 않은 id: " + id);
+
+        for (InverterPortStrategy strategy : strategies) {
+            if (strategy.support(inverterId)) {
+                log.info("삼상 인버터 요청 포트: {}", strategy.getPortNameByInverterId(inverterId));
+                return sendRequestSerial(request, 43, strategy.getPortNameByInverterId(inverterId));
+            }
         }
+        throw new IllegalArgumentException("유효하지 않은 inverterId: " + inverterId);
 
     }
 
     /**
      * 시리얼 포트를 통해 요청을 전송하고 응답을 수신합니다.
      *
-     * @param request 요청 바이트 배열
+     * @param request                요청 바이트 배열
      * @param expectedResponseLength 예상 응답 길이 (바이트 단위)
      * @return 수신된 응답 바이트 배열
      */
