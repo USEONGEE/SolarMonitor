@@ -41,7 +41,6 @@ public class FourInverterPortStrategy extends InverterPortStrategy {
                 throw new RuntimeException("시리얼 포트를 열 수 없습니다: " + portName);
             }
 
-            List<JunctionBoxDataRequestDto> result = new ArrayList<>();
             byte[] header = new byte[]{
                     (byte) deviceId,
                     0x03,
@@ -73,8 +72,7 @@ public class FourInverterPortStrategy extends InverterPortStrategy {
             List<JunctionBoxDataRequestDto> dataList = this.parseJunctionBoxResponse(response);
             log.info("접속함 데이터 파싱 결과: {}", dataList);
 
-            log.info(String.valueOf(result));
-            return result;
+            return dataList;
         } catch (Exception e) {
             throw new RuntimeException("접속함 데이터 요청 실패", e);
         } finally {
