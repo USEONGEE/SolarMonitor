@@ -64,6 +64,7 @@ public class DataRequesterImpl implements DataRequester {
         Inverter inverter = inverterRepository.findById(inverterId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 삼상 인버터가 존재하지 않습니다."));
 
+        log.info("requestThreePhaseData: inverterId={}", inverter.getId());
         byte[] response = remsClient.requestThreePhase(inverter.getId()); // REMS 요청
         ThreePhaseInverterDto dto = parseThreePhaseResponse(response);
         log.info("requestThreePhaseData");
