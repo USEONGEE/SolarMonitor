@@ -60,9 +60,18 @@ public class SchedulerProd {
 
         SeasonalPanelDataDto seasonalPanelDataDto = dataRequester.requestSeasonal("COM10", 1L);
         dataProcessor.processSeasonalPanelData(seasonalPanelDataDto);
-        log.info("seasonalPanelDataDto: {}", seasonalPanelDataDto);
         SeasonalPanelDataDto seasonalPanelDataDto1 = dataRequester.requestSeasonal("COM11", 2L);
         dataProcessor.processSeasonalPanelData(seasonalPanelDataDto1);
+        SeasonalPanelDataDto seasonalPanelDataDto2 = dataRequester.requestSeasonal("COM14", 3L);
+        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto2);
+        SeasonalPanelDataDto seasonalPanelDataDto3 = dataRequester.requestSeasonal("COM15", 4L);
+        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto3);
+        SeasonalPanelDataDto seasonalPanelDataDto4 = dataRequester.requestSeasonal("COM16", 5L);
+        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto4);
+        SeasonalPanelDataDto seasonalPanelDataDto5 = dataRequester.requestSeasonal("COM17", 6L);
+        dataProcessor.processSeasonalPanelData(seasonalPanelDataDto5);
+
+        log.info("seasonalPanelDataDto: {}", seasonalPanelDataDto);
         log.info("seasonalPanelDataDto: {}", seasonalPanelDataDto1);
     }
 
