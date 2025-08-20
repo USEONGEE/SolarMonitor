@@ -27,7 +27,7 @@ public class InverterAccumulationScheduler {
     private final JunctionBoxDataAccumulationService junctionBoxDataAccumulationService;
 
     // 매 시간마다 전 시간의 마지막 데이터를 저장
-    @Scheduled(cron = "10 0 * * * ?") // 매 정각마다 실행
+    @Scheduled(cron = "5 0 * * * ?") // 매 정각마다 실행
     @Transactional
     public void accumulateHourlyData() {
         log.info("Accumulate hourly data");
@@ -39,18 +39,19 @@ public class InverterAccumulationScheduler {
         LocalDateTime lastHourEnd = hourRangeBy.getEnd();
 
         for (Inverter inverter : inverters) {
-            InverterData lastData = inverterDataRepository.findFirstByInverterIdAndTimestampLessThanOrderByTimestampDesc(inverter.getId(), lastHourStart) // TODO 여기에 문제
-                    .orElse(null);
-            if (lastData != null) {
-                InverterAccumulation hourlyAccumulation = new InverterAccumulation(
-                        inverter,
-                        lastData.getCumulativeEnergy(),
-                        AccumulationType.HOURLY,
-                        lastHourEnd
-                );
-
-                accumulationRepository.save(hourlyAccumulation);
+            List<InverterData> byInverterIdAndTimestampBetween = inverterDataRepository.findByInverterIdAndTimestampBetween(inverter.getId(), lastHourStart, lastHourEnd);
+            if (byInverterIdAndTimestampBetween.isEmpty()) {
+                continue;
             }
+            InverterData lastData = byInverterIdAndTimestampBetween.get(byInverterIdAndTimestampBetween.size() - 1);
+            InverterAccumulation hourlyAccumulation = new InverterAccumulation(
+                    inverter,
+                    lastData.getCumulativeEnergy(),
+                    AccumulationType.HOURLY,
+                    lastHourEnd
+            );
+
+            accumulationRepository.save(hourlyAccumulation);
         }
     }
 
@@ -101,28 +102,30 @@ public class InverterAccumulationScheduler {
     }
 
     // 매월 1일 자정에 지난 달 누적 발전량을 저장
-    @Scheduled(cron = "10 0 0 1 * ?")
+    @Scheduled(cron = "15 0 0 1 * ?")
     @Transactional
     public void accumulateMonthlyData() {
         log.info("Accumulate monthly data");
         List<Inverter> inverters = inverterRepository.findAll();
         List<JunctionBox> junctionBoxes = junctionBoxRepository.findAll();
         LocalDate lastMonth = LocalDate.now().minusMonths(1);
+        LocalDateTime lastMonthEnd = lastMonth.withDayOfMonth(lastMonth.lengthOfMonth())
+                .atTime(23, 59, 59);
 
         for (Inverter inverter : inverters) {
-            Double monthlyTotal = accumulationRepository.findByInverterIdAndType(inverter.getId(), AccumulationType.DAILY).stream()
-                    .filter(acc -> acc.getDate().getMonth() == lastMonth.getMonth() && acc.getDate().getYear() == lastMonth.getYear())
-                    .mapToDouble(InverterAccumulation::getCumulativeEnergy)
-                    .sum();
-
-            InverterAccumulation monthlyAccumulation = new InverterAccumulation(
-                    inverter,
-                    monthlyTotal,
-                    AccumulationType.MONTHLY,
-                    lastMonth.withDayOfMonth(lastMonth.lengthOfMonth()).atTime(23, 59)
-            );
-
-            accumulationRepository.save(monthlyAccumulation);
+            inverterDataRepository
+                    .findFirstByInverterIdAndTimestampLessThanEqualOrderByTimestampDesc(
+                            inverter.getId(), lastMonthEnd
+                    )
+                    .ifPresent(lastData -> {
+                        InverterAccumulation monthlyAccumulation = new InverterAccumulation(
+                                inverter,
+                                lastData.getCumulativeEnergy(),   // 월말 스냅샷 값
+                                AccumulationType.MONTHLY,
+                                lastMonthEnd
+                        );
+                        accumulationRepository.save(monthlyAccumulation);
+                    });
         }
 
         for (JunctionBox junctionBox : junctionBoxes) {
