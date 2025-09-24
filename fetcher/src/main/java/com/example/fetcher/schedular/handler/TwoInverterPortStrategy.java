@@ -18,17 +18,12 @@ public class TwoInverterPortStrategy extends InverterPortStrategy {
     private final CrcCalculater crcCalculater;      // CRC 계산기
     @Override
     public boolean support(long inverterId) {
-        return inverterId == 1L || inverterId == 2L || inverterId == 3L;
+        return inverterId == 2L;
     }
 
     @Override
     public String getPortNameByInverterId(long inverterId) {
-        return switch ((int) inverterId) {
-            case 1 -> "COM13"; // 첫 번째 접합 박스
-            case 2 -> "COM12"; // 두 번째 접합 박스
-            case 3 -> "COM18"; // 세 번째 접합 박스
-            default -> throw new IllegalArgumentException("지원하지 않는 장치 ID: " + inverterId);
-        };
+        return "COM12";
     }
 
     @Override

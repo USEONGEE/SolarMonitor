@@ -5,6 +5,9 @@ import com.example.web.dto.JunctionBoxDataRequestDto;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+    * InverterPortStrategy: 인버터 포트 전략 추상 클래스 -> "N"InverterPortStrategy 클래스들이 상속. N은 array의 갯수
+ */
 public abstract class InverterPortStrategy {
     public abstract boolean support(long inverterId);
 
