@@ -19,7 +19,7 @@ public class FourInverterPortStrategy extends InverterPortStrategy {
     private final CrcCalculater crcCalculater;      // CRC 계산기
     @Override
     public boolean support(long inverterId) {
-        return inverterId == 1L || inverterId == 3L || inverterId == 4L;
+        return inverterId == 1L || inverterId == 2L ||inverterId == 3L || inverterId == 4L;
     }
 
     @Override
@@ -27,6 +27,8 @@ public class FourInverterPortStrategy extends InverterPortStrategy {
         switch ((int) inverterId) {
             case 1:
                 return "COM13"; // 첫 번째 접합 박스
+            case 2:
+                return "COM12";
             case 3:
                 return "COM18"; // 세 번째 접합 박스
             case 4:
